@@ -4,7 +4,10 @@ from django.core.urlresolvers import reverse
 
 from emencia.django.newsletter.models import Link
 from emencia.django.newsletter.settings import USE_PRETTIFY
+
+# --- tracking ankers --- start -----------------------------------------------
 from emencia.django.newsletter.settings import TRACKING_ANKERS
+# --- tracking ankers --- end -------------------------------------------------
 
 
 def body_insertion(content, insertion, end=False):
@@ -35,10 +38,11 @@ def track_links(content, context):
         if link_markup.get('href') and \
                'no-track' not in link_markup.get('rel', ''):
 
-            # don't track links with an anker
+            # --- tracking ankers --- start -----------------------------------
             if TRACKING_ANKERS:
                 if '#' in link_markup.get('href')[0]:
                     continue
+            # --- tracking ankers --- end -------------------------------------
 
             link_href = link_markup['href']
             link_title = link_markup.get('title', link_href)
