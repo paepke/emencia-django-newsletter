@@ -47,6 +47,9 @@ from emencia.django.newsletter.settings import SLEEP_BETWEEN_SENDING
 from emencia.django.newsletter.settings import \
      RESTART_CONNECTION_BETWEEN_SENDING
 
+# --- subscriber verification --- start ---------------------------------------
+from emencia.django.newsletter.settings import SUBSCRIBER_VERIFICATION
+# --- subscriber verification --- end -----------------------------------------
 
 if not hasattr(timedelta, 'total_seconds'):
     def total_seconds(td):
@@ -84,6 +87,58 @@ class NewsLetterSender(object):
         self.newsletter = newsletter
         self.newsletter_template = Template(self.newsletter.content)
         self.title_template = Template(self.newsletter.title)
+
+    def run(self):
+        """Send the mails"""
+        if not self.can_send:
+            return
+
+        if not self.smtp:
+            self.smtp_connect()
+
+        self.attachments = self.build_attachments()
+
+        number_of_recipients = len(self.expedition_list)
+        if self.verbose:
+            print '%i emails will be sent' % number_of_recipients
+
+        i = 1
+        for contact in self.expedition_list:
+            # --- subscriber verification --- start ---------------------------
+            if SUBSCRIBER_VERIFICATION:
+                if not contact.verified:
+                    print '- No verified email: {0}'.format(contact.email)
+                    continue
+            # --- subscriber verification --- end -----------------------------
+
+            if self.verbose:
+                print '- Processing %s/%s (%s)' % (
+                    i, number_of_recipients, contact.pk)
+
+            try:
+                message = self.build_message(contact)
+                self.smtp.sendmail(smart_str(self.newsletter.header_sender),
+                                   contact.email,
+                                   message.as_string())
+                status = self.test and ContactMailingStatus.SENT_TEST \
+                         or ContactMailingStatus.SENT
+            except (UnicodeError, SMTPRecipientsRefused):
+                status = ContactMailingStatus.INVALID
+                contact.valid = False
+                contact.save()
+            except:
+                status = ContactMailingStatus.ERROR
+
+            ContactMailingStatus.objects.create(newsletter=self.newsletter,
+                                                contact=contact, status=status)
+            if SLEEP_BETWEEN_SENDING:
+                time.sleep(SLEEP_BETWEEN_SENDING)
+            if RESTART_CONNECTION_BETWEEN_SENDING:
+                self.smtp.quit()
+                self.smtp_connect()
+            i += 1
+        self.smtp.quit()
+        self.update_newsletter_status()
 
     def build_message(self, contact):
         """
