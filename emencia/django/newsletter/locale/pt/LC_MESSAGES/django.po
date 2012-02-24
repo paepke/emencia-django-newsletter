@@ -692,7 +692,7 @@ msgstr "clique aqui"
 
 #: templates/newsletter/newsletter_link_unsubscribe.html:5
 msgid "For unsubscribing to this mailing list,"
-msgstr "Foi cancelada a sua subscrição desta lista de discussão."
+msgstr "Para anular a sua subscrição desta lista de discussão."
 
 #: templates/newsletter/newsletter_statistics.html:86 views/statistics.py:147
 msgid "Consultation histogram"
