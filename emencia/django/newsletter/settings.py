@@ -38,7 +38,7 @@ SLEEP_BETWEEN_SENDING = getattr(
 RESTART_CONNECTION_BETWEEN_SENDING = getattr(
     settings, 'NEWSLETTER_RESTART_CONNECTION_BETWEEN_SENDING', False)
 
-BASE_PATH = getattr(settings, 'NEWSLETTER_BASE_PATH', 'uploads/newsletter')
+BASE_PATH = getattr(settings, 'NEWSLETTER_BASE_PATH', 'upload/newsletter')
 
 # --- tracking ignore anchor --- start ----------------------------------------
 TRACKING_IGNORE_ANCHOR = getattr(
@@ -66,6 +66,6 @@ settings.TEMPLATE_DIRS = (
 
 # NPH
 # Relative to MEDIA_ROOT
-FILEBROWSER_DIRECTORY = getattr(settings, 'FILEBROWSER_DIRECTORY', 'uploads/')
-NEWSLETTER_TINYMCE_TEMPLATE_DIR = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_DIR', 'uploads/tinymce/templates/')
+FILEBROWSER_DIRECTORY = getattr(settings, 'FILEBROWSER_DIRECTORY', 'upload/')
+NEWSLETTER_TINYMCE_TEMPLATE_DIR = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_DIR', 'upload/tinymce/templates/')
 NEWSLETTER_TINYMCE_TEMPLATE_URL = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_URL', '/tinymce/templates/')
