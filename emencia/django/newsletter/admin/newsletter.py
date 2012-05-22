@@ -13,6 +13,7 @@ from emencia.django.newsletter.models import MailingList
 from emencia.django.newsletter.mailer import Mailer
 from emencia.django.newsletter.settings import USE_TINYMCE
 from emencia.django.newsletter.settings import USE_WORKGROUPS
+from emencia.django.newsletter.settings import TINYMCE_WIDGET_ATTRS
 try:
     CAN_USE_PREMAILER = True
     from emencia.django.newsletter.utils.premailer import Premailer
@@ -207,7 +208,7 @@ if USE_TINYMCE:
 
     class NewsletterTinyMCEForm(forms.ModelForm):
         content = forms.CharField(
-            widget=TinyMCE(attrs={'cols': 150, 'rows': 80}))
+            widget=TinyMCE(attrs=TINYMCE_WIDGET_ATTRS))
 
         class Meta:
             model = Newsletter
