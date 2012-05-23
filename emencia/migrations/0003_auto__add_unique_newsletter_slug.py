@@ -120,4 +120,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['newsletter']
+    complete_apps = ['emencia']
