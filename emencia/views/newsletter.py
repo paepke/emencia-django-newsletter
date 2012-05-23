@@ -1,10 +1,10 @@
 """Views for emencia Newsletter"""
+from django.contrib.admin.views.decorators import staff_member_required
 from django.template import RequestContext
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
 
 from django.contrib.sites.models import Site
-from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string as render_file
 from django.http import HttpResponseForbidden
 
@@ -54,7 +54,7 @@ def render_newsletter(request, slug, context):
                               context_instance=RequestContext(request))
 
 
-@login_required
+@staff_member_required
 def view_newsletter_preview(request, slug):
     """View of the newsletter preview"""
     context = {'contact': request.user}
