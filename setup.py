@@ -5,7 +5,7 @@ from setuptools import find_packages
 from emencia.django import newsletter
 
 
-setup(name='emencia.django.newsletter',
+setup(name='emencia',
       version=newsletter.__version__,
       description='A Django app for sending newsletter by email to a contact list.',
       long_description=open('README.rst').read() + '\n' +
@@ -27,7 +27,7 @@ setup(name='emencia.django.newsletter',
 
       license=newsletter.__license__,
       packages=find_packages(exclude=['demo']),
-      namespace_packages=['emencia', 'emencia.django'],
+      namespace_packages=['emencia',],
       include_package_data=True,
       zip_safe=False,
       install_requires=['setuptools',
