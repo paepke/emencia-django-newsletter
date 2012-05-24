@@ -43,6 +43,7 @@ from emencia.settings import TRACKING_IMAGE_FORMAT
 from emencia.settings import UNIQUE_KEY_LENGTH
 from emencia.settings import UNIQUE_KEY_CHAR_SET
 from emencia.settings import INCLUDE_UNSUBSCRIPTION
+from emencia.settings import INCLUDE_SITE_LINKS
 from emencia.settings import SLEEP_BETWEEN_SENDING
 from emencia.settings import \
      RESTART_CONNECTION_BETWEEN_SENDING
@@ -252,6 +253,10 @@ class NewsLetterSender(object):
         content = self.newsletter_template.render(context)
         if TRACKING_LINKS:
             content = track_links(content, context)
+
+        if INCLUDE_SITE_LINKS:
+            link_site = render_to_string('newsletter/newsletter_link_site.html', context)
+            content = body_insertion(content, link_site)
 
         # --- template --- start ----------------------------------------------
         if TRACKING_IMAGE:
