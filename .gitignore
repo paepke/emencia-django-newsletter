@@ -18,4 +18,5 @@ uploads/*
 develop-eggs/*
 downloads/*
 src_eggs/*
+.idea
 .mr.developer.cfg
