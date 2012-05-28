@@ -184,7 +184,7 @@ $(document).ready(function(){
     <div class="module" id="general-informations-module">
         <h2>{% trans "Informations" %}</h2>
 	<h3>{% trans "Recipients" %}</h3>
-	<p>{{ stats.mails_to_send }} <a href="{% url admin:newsletter_mailinglist_change object.mailing_list.pk %}">{% trans "View" %}</a></p>
+	<p>{{ stats.mails_to_send }} <a href="{% url admin:emencia_mailinglist_change object.mailing_list.pk %}">{% trans "View" %}</a></p>
         <h3>{% trans "Status" %}</h3>
 	<p>{{ object.get_status_display }} {% if stats.remaining_mails %}<span class="mini quiet">(-{{ stats.remaining_mails }})</span>{% endif %}</p>
 	<h3>{% trans "Sending date" %}</h3>
