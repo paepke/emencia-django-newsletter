@@ -35,11 +35,10 @@ class ContactAdmin(admin.ModelAdmin):
     list_filter = ('subscriber', 'valid', 'tester',
                    'creation_date', 'modification_date')
     search_fields = ('email', 'first_name', 'last_name')
-    fieldsets = ((None, {'fields': ('email', 'first_name', 'last_name')}),
-                 (_('Status'), {'fields': ('subscriber', 'valid', 'tester')}),
-                 (_('Advanced'), {'fields': ('object_id', 'content_type'),
-                                  'classes': ('collapse',)}),
-                 )
+    fieldsets = (
+        (None, {'fields': ('email', 'first_name', 'last_name')}),
+        (_('Status'), {'fields': ('subscriber', 'valid', 'tester')}),
+    )
     actions = ['create_mailinglist', 'export_vcard', 'export_excel']
     actions_on_top = False
     actions_on_bottom = True
@@ -59,23 +58,6 @@ class ContactAdmin(admin.ModelAdmin):
         contact.save()
         for workgroup in workgroups:
             workgroup.contacts.add(contact)
-
-    def related_object_admin(self, contact):
-        """Display link to related object's admin"""
-        if contact.content_type and contact.object_id:
-            admin_url = reverse(
-                'admin:%s_%s_change' % (contact.content_type.app_label,
-                                        contact.content_type.model),
-                args=(contact.object_id,)
-            )
-            return '%s: <a href="%s">%s</a>' % (
-                contact.content_type.model.capitalize(),
-                admin_url,
-                contact.content_object.__unicode__()
-            )
-        return _('No relative object')
-    related_object_admin.allow_tags = True
-    related_object_admin.short_description = _('Related object')
 
     def total_subscriptions(self, contact):
         """Display user subscriptions to unsubscriptions"""
