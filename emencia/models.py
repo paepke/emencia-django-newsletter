@@ -17,6 +17,7 @@ from emencia.settings import MAILER_HARD_LIMIT
 from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import DEFAULT_HEADER_SENDER
 from emencia.utils.vcard import vcard_contact_export
+from emencia.utils.premailer import Premailer
 
 # --- subscriber verification --- start ---------------------------------------
 from emencia.settings import SUBSCRIBER_VERIFICATION
@@ -307,6 +308,12 @@ class Newsletter(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.content.startswith('http://'):
+            premailer = Premailer(self.content.strip())
+            self.content = premailer.transform()
+        super(Newsletter, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('-creation_date',)
