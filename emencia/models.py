@@ -3,6 +3,8 @@ from smtplib import SMTP
 from smtplib import SMTPHeloError
 from datetime import datetime
 from datetime import timedelta
+from inlinestyler.utils import inline_css
+from urllib2 import urlopen
 
 from django.db import models
 from django.utils.encoding import smart_str
@@ -17,7 +19,6 @@ from emencia.settings import MAILER_HARD_LIMIT
 from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import DEFAULT_HEADER_SENDER
 from emencia.utils.vcard import vcard_contact_export
-from emencia.utils.premailer import Premailer
 
 # --- subscriber verification --- start ---------------------------------------
 from emencia.settings import SUBSCRIBER_VERIFICATION
@@ -287,6 +288,11 @@ class Newsletter(models.Model):
     modification_date = models.DateTimeField(_('modification date'),
                                              auto_now=True)
 
+    def status_str(self):
+        for (code, string) in self.STATUS_CHOICES:
+            if code == self.status:
+                return string
+
     def mails_sent(self):
         return self.contactmailingstatus_set.filter(
             status=ContactMailingStatus.SENT
@@ -311,8 +317,9 @@ class Newsletter(models.Model):
 
     def save(self, *args, **kwargs):
         if self.content.startswith('http://'):
-            premailer = Premailer(self.content.strip())
-            self.content = premailer.transform()
+            url = self.content.strip()
+            html_page = urlopen(url).read()
+            self.content = inline_css(html_page, url)
         super(Newsletter, self).save(*args, **kwargs)
 
     class Meta:
