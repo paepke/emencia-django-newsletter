@@ -26,7 +26,7 @@ from emencia.utils.workgroups import request_workgroups_newsletters_pk
 from emencia.utils.workgroups import request_workgroups_mailinglists_pk
 
 # --- templates --- start -----------------------------------------------------
-from emencia.django.newsletter.settings import USE_TEMPLATE
+from emencia.settings import USE_TEMPLATE
 # --- templates --- end -------------------------------------------------------
 
 class AttachmentAdminInline(admin.TabularInline):
@@ -227,6 +227,20 @@ if USE_TINYMCE:
 
     class NewsletterAdmin(BaseNewsletterAdmin):
         form = NewsletterTinyMCEForm
+        
+elif USE_CKEDITOR:
+    from ckeditor.widgets import CKEditorWidget
+    
+    class NewsletterCKEditorForm(forms.ModelForm):
+        content = forms.CharField(
+            widget=CKEditorWidget())
+
+        class Meta:
+            model = Newsletter
+
+    class NewsletterAdmin(BaseNewsletterAdmin):
+        form = NewsletterCKEditorForm
+    
 else:
     class NewsletterAdmin(BaseNewsletterAdmin):
         pass

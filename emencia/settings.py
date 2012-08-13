@@ -14,6 +14,9 @@ USE_TINYMCE = getattr(settings, 'NEWSLETTER_USE_TINYMCE',
                       'tinymce' in settings.INSTALLED_APPS)
 TINYMCE_WIDGET_ATTRS = getattr(settings, 'TINYMCE_WIDGET_ATTRS', {'cols': 150, 'rows': 80})
 
+USE_CKEDITOR = getattr(settings, 'NEWSLETTER_USE_CKEDITOR',
+                      'ckeditor' in settings.INSTALLED_APPS)
+
 USE_PRETTIFY = getattr(settings, 'NEWSLETTER_USE_PRETTIFY', True)
 
 MAILER_HARD_LIMIT = getattr(settings, 'NEWSLETTER_MAILER_HARD_LIMIT', 10000)
