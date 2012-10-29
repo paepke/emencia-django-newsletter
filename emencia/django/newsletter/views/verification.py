@@ -109,8 +109,6 @@ def view_uuid_verification(request, link_id, form_class=None):
             subscription['object'].delete()
         
     except SubscriberVerification.DoesNotExist:
-        print '### 1.2'
-        
         context['uuid_exist'] = False
 
     return render_to_response('newsletter/uuid_verification.html',
