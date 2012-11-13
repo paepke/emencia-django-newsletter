@@ -8,7 +8,7 @@ from django.http import HttpResponse
 
 def vcard_contact_export(contact):
     """Export in VCard 3.0 a Contact model instance"""
-    if hasattr(contact.content_object, 'vcard_export'):
+    if hasattr(contact, 'content_object') and hasattr(contact.content_object, 'vcard_export'):
         return contact.content_object.vcard_export()
 
     vcard = vobject.vCard()
