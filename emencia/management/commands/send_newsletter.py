@@ -5,7 +5,7 @@ from django.core.management.base import NoArgsCommand
 
 from emencia.mailer import Mailer
 from emencia.models import Newsletter
-
+import codecs
 
 class Command(NoArgsCommand):
     """Send the newsletter in queue"""
@@ -24,7 +24,7 @@ class Command(NoArgsCommand):
             mailer = Mailer(newsletter, verbose=verbose)
             if mailer.can_send:
                 if verbose:
-                    print u'Start emailing %s' % newsletter.pk
+                    print 'Start emailing %s' % codecs.encode(newsletter.title,"utf-8")
                 mailer.run()
 
         if verbose:
