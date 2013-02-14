@@ -115,11 +115,13 @@ class MailingListAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super(MailingListAdmin, self).get_urls()
-        my_urls = patterns('',
-                           url(r'^export/vcard/(?P<mailinglist_id>\d+)/$',
-                               self.admin_site.admin_view(self.exportion_vcard),
-                               name='newsletter_mailinglist_export_vcard'),
-                           url(r'^export/excel/(?P<mailinglist_id>\d+)/$',
-                               self.admin_site.admin_view(self.exportion_excel),
-                               name='newsletter_mailinglist_export_excel'))
+        my_urls = patterns(
+            '',
+            url(r'^export/vcard/(?P<mailinglist_id>\d+)/$',
+                self.admin_site.admin_view(self.exportion_vcard),
+                name='%s_mailinglist_export_vcard' % self.opts.app_label),
+            url(r'^export/excel/(?P<mailinglist_id>\d+)/$',
+                self.admin_site.admin_view(self.exportion_excel),
+                name='%s_mailinglist_export_excel' % self.opts.app_label),
+        )
         return my_urls + urls
