@@ -88,12 +88,9 @@ class ContactAdmin(admin.ModelAdmin):
         new_mailing.save()
 
         if 'lite' in settings.DATABASES['default']['ENGINE']:
-            self.message_user(
-                request,
-                _('SQLite3 or a SpatialLite database type detected, ' \
-                  'please note you will be limited to 999 contacts ' \
-                  'per mailing list.')
-            )
+            self.message_user(request, _('SQLite3 or a SpatialLite database type detected, '
+                                         'please note you will be limited to 999 contacts '
+                                         'per mailing list.'))
         try:
             new_mailing.subscribers = queryset.all()
         except DatabaseError:
@@ -104,10 +101,9 @@ class ContactAdmin(admin.ModelAdmin):
                 workgroup.mailinglists.add(new_mailing)
 
         self.message_user(request, _('%s succesfully created.') % new_mailing)
-        return HttpResponseRedirect(reverse(
-            'admin:newsletter_mailinglist_change',
-            args=[new_mailing.pk]
-        ))
+        urlname = 'admin:%s_mailinglist_change' % self.opts.app_label
+        return HttpResponseRedirect(reverse(urlname, args=[new_mailing.pk]))
+
     create_mailinglist.short_description = _('Create a mailinglist')
 
     def importation(self, request):

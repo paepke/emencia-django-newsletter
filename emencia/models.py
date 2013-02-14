@@ -162,7 +162,8 @@ class Contact(models.Model):
     def get_absolute_url(self):
         if self.content_type and self.object_id:
             return self.content_object.get_absolute_url()
-        return reverse('admin:newsletter_contact_change', args=(self.pk,))
+        urlname = 'admin:%s_contact_change' % self._meta.app_label
+        return reverse(urlname, args=[self.pk])
 
     def __unicode__(self):
         if self.first_name and self.last_name:
