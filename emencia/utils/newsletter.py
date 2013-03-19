@@ -1,5 +1,5 @@
 """Utils for newsletter"""
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from django.core.urlresolvers import reverse
 
 from emencia.models import Link
