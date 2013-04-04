@@ -1,5 +1,7 @@
 """Utils for newsletter"""
-from bs4 import BeautifulSoup
+import re
+
+from BeautifulSoup import BeautifulSoup
 from django.core.urlresolvers import reverse
 
 from emencia.models import Link
@@ -46,15 +48,17 @@ def track_links(content, context):
             # --- tracking ignore anchor --- end ------------------------------
 
             link_href = link_markup['href']
+
             if link_href.startswith("http"):
                 link_title = link_markup.get('title', link_href)
-                link, created = Link.objects.get_or_create(url=link_href,
-                                                           defaults={'title': link_title})
-                link_markup['href'] = 'http://%s%s' % (context['domain'], reverse('newsletter_newsletter_tracking_link',
-                                                                                  args=[context['newsletter'].slug,
-                                                                                        context['uidb36'], context['token'],
-                                                                                        link.pk]))
+                link, created = Link.objects.get_or_create(url=link_href, defaults={'title': link_title})
+                link_markup['href'] = 'http://%s%s' % (context['domain'], reverse('newsletter_newsletter_tracking_link', args=[context['newsletter'].slug, context['uidb36'], context['token'], link.pk]))
+
     if USE_PRETTIFY:
         return soup.prettify()
     else:
         return soup.renderContents()
+
+def fix_tinymce_links(content):
+    """ Clean the src attribute of images in content edited with TinyMCE and django-filebrowser"""
+    return re.sub(r'(\.\.\/)+', '/', content)
