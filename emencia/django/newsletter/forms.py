@@ -16,6 +16,8 @@ class MailingListSubscriptionForm(forms.ModelForm):
     # Then the contact is always added to the subscribers field
     # of the mailing list because it will be cleaned with no
     # double.
+    error_css_class = 'error'
+    required_css_class = 'required'
 
     email = forms.EmailField(label=_('Email'), max_length=75)
 

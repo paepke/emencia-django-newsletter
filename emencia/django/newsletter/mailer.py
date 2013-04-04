@@ -9,6 +9,7 @@ from StringIO import StringIO
 from datetime import datetime
 from datetime import timedelta
 from smtplib import SMTPRecipientsRefused
+from premailer import Premailer
 
 try:
     from email.mime.multipart import MIMEMultipart
@@ -39,6 +40,7 @@ from emencia.django.newsletter.models import ContactMailingStatus
 from emencia.django.newsletter.utils.tokens import tokenize
 from emencia.django.newsletter.utils.newsletter import track_links
 from emencia.django.newsletter.utils.newsletter import body_insertion
+from emencia.django.newsletter.utils.newsletter import fix_tinymce_links
 from emencia.django.newsletter.settings import TRACKING_LINKS
 from emencia.django.newsletter.settings import TRACKING_IMAGE
 from emencia.django.newsletter.settings import TRACKING_IMAGE_FORMAT
@@ -83,7 +85,6 @@ class NewsLetterSender(object):
         self.test = test
         self.verbose = verbose
         self.newsletter = newsletter
-        self.message_template = Template(self.newsletter.content)
         self.title_template = Template(self.newsletter.title)
 
     def build_message(self, contact):
@@ -159,16 +160,20 @@ class NewsLetterSender(object):
         """Generate the mail for a contact"""
 
         uidb36, token = tokenize(contact)
+        domain = Site.objects.get_current().domain
         context = Context({
             'contact': contact,
-            'domain': Site.objects.get_current().domain,
+            'domain': domain,
             'newsletter': self.newsletter,
             'tracking_image_format': TRACKING_IMAGE_FORMAT,
             'uidb36': uidb36, 'token': token,
         })
 
+        message_content = fix_tinymce_links(self.newsletter.content)
+        message_template = Template(message_content)
+
         # Render only the message provided by the user with the WYSIWYG editor
-        message = self.message_template.render(context)
+        message = message_template.render(context)
 
         context.update({'message': message})
 
@@ -189,7 +194,12 @@ class NewsLetterSender(object):
         if TRACKING_LINKS:
             content = track_links(content, context)
 
-        return smart_unicode(content)
+        content = smart_unicode(content)
+
+        p = Premailer(content, base_url="http://%s" % domain, preserve_internal_links=True)
+        content = p.transform()
+
+        return content
 
     def update_newsletter_status(self):
         """Update the status of the newsletter"""

@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>{% block title %}{% endblock title %}</title>
+    <title>{% block title %}{{ title }}{% endblock title %}</title>
     <style type="text/css">
         /* Based on The MailChimp Reset INLINE: Yes. */  
         /* Client-specific Styles */
@@ -52,7 +52,7 @@
         Bring inline: Yes. */
         a {color: orange;}
 
-
+        {% comment %}
         /***************************************************
         ****************************************************
         MOBILE TARGETING
@@ -111,6 +111,7 @@
         /* Put CSS for high density (hdpi) Android layouts in here */
         }
         /* end Android targeting */
+        {% endcomment %}
 
     </style>
 
