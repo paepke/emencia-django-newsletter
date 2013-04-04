@@ -1,6 +1,7 @@
 """Settings for emencia"""
 import string
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 BASE64_IMAGES = {
     'gif': 'AJEAAAAAAP///////wAAACH5BAEHAAIALAAAAAABAAEAAAICVAEAOw==',
@@ -63,13 +64,9 @@ SUBSCRIBER_VERIFICATION = getattr(
 )
 # --- subscriber verification --- end -----------------------------------------
 
-# --- templates --- start -----------------------------------------------------
-USE_TEMPLATE = getattr( settings, 'NEWSLETTER_USE_TEMPLATE', True)
-
-settings.TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'templates'),
-)
-# --- templates --- end -------------------------------------------------------
+TEMPLATES = getattr(settings, 'NEWSLETTER_TEMPLATES', None)
+if not TEMPLATES:
+    raise ImproperlyConfigured("Error loading templates: you must define NEWSLETTER_TEMPLATES into your settings")
 
 # NPH
 # Relative to MEDIA_ROOT

@@ -258,34 +258,11 @@ class Newsletter(models.Model):
                              help_text=_('You can use the "{{ UNIQUE_KEY }}" variable ' \
                                          'for unique identifier within the newsletter\'s title.'))
 
-    # --- templates --- start -------------------------------------------------
-    if USE_TEMPLATE:
-        content = models.TextField(
-            _('content'),
-            help_text=_('Or paste an URL.'),
-            default=_('<!-- Edit your newsletter here -->')
-        )
-        template = models.CharField(
-            _('template'),
-            max_length=100,
-            choices=get_templates(),
-        )
-    else:
-        content = models.TextField(
-            _('content'),
-            help_text=_('Or paste an URL.'),
-            default=_('<body>\n<!-- Edit your newsletter here -->\n</body>')
-        )
-    # --- templates --- end ---------------------------------------------------
+    template = models.CharField(max_length=200, choices=TEMPLATES)
 
-    public = models.BooleanField(_('public'), default=False)
-
-    mailing_list = models.ForeignKey(MailingList,
-                                     verbose_name=_('mailing list'), null=True)
-    test_contacts = models.ManyToManyField(
-        Contact, verbose_name=_('test contacts'),
-        blank=True, null=True
-    )
+    mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
+    test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'),
+                                           blank=True, null=True)
 
     server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'),
                                default=1)

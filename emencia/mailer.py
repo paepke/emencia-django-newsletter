@@ -29,6 +29,7 @@ from html2text import html2text as html2text_orig
 from django.contrib.sites.models import Site
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.template.loader import get_template
 from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
 from django.conf import settings
@@ -90,7 +91,7 @@ class NewsLetterSender(object):
         self.test = test
         self.verbose = verbose
         self.newsletter = newsletter
-        self.newsletter_template = Template(self.newsletter.content)
+        self.message_template = Template(self.newsletter.content)
         self.title_template = Template(self.newsletter.title)
 
     def run(self):
@@ -223,80 +224,38 @@ class NewsLetterSender(object):
         uidb36, token = tokenize(contact)
 
         pre_context = {
+
+        uidb36, token = tokenize(contact)
+        context = Context({
             'contact': contact,
             'domain': Site.objects.get_current().domain,
             'newsletter': self.newsletter,
             'tracking_image_format': TRACKING_IMAGE_FORMAT,
-            'uidb36': uidb36,
-            'token': token
-        }
+            'uidb36': uidb36, 'token': token,
+        })
 
-        link_site_exist = False
-        link_site = render_to_string('newsletter/newsletter_link_site.html', Context(pre_context))
-        if '{{ link_site }}' in self.newsletter.content:
-            link_site_exist = True
-            pre_context['link_site'] = link_site
+        # Render only the message provided by the user with the WYSIWYG editor
+        message = self.message_template.render(context)
 
-        if INCLUDE_UNSUBSCRIPTION:
-            unsubscribtion_exist = False
-            
-            unsubscription = render_to_string(
-                'newsletter/newsletter_link_unsubscribe.html',
-                Context(pre_context)
-            )
-            
-            if '{{ unsubscription }}' in self.newsletter.content:
-                unsubscribtion_exist = True
-                pre_context['unsubscription'] = unsubscription
+        context.update({'message': message})
 
-        context = Context(pre_context)
-        
-        content = self.newsletter_template.render(context)
-        if TRACKING_LINKS:
-            content = track_links(content, context)
-
-        link_site = ''
-        if INCLUDE_SITE_LINKS:
-            link_site = render_to_string('newsletter/newsletter_link_site.html', context)
-
-        content = body_insertion(content, link_site)
+        link_site = render_to_string('newsletter/newsletter_link_site.html', context)
+        context.update({'link_site': link_site})
 
         # --- template --- start ----------------------------------------------
         if INCLUDE_UNSUBSCRIPTION:
             unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
-            content = body_insertion(content, unsubscription, end=True)
+            context.update({'unsubscription': unsubscription})
 
         if TRACKING_IMAGE:
-            image_tracking = render_to_string(
-                'newsletter/newsletter_image_tracking.html',
-                context
-            )
+            image_tracking = render_to_string('newsletter/newsletter_image_tracking.html', context)
+            context.update({'image_tracking': image_tracking})
 
-        if USE_TEMPLATE:
-            content_context = {'content': content}
+        content_template = get_template("newsletter/%s" % self.newsletter.template)
+        content = content_template.render(context)
 
-            if not link_site_exist:
-                content_context['link_site'] = link_site
-
-            if not unsubscribtion_exist:
-                content_context['unsubscription'] = unsubscription
-            
-            content =  render_to_string(
-                'mailtemplates/{0}/{1}'.format(
-                    self.newsletter.template,
-                    'index.html'
-                ),
-                content_context
-            )
-            #insert image_tracking
-        else:
-            content = body_insertion(content, link_site)
-            if INCLUDE_UNSUBSCRIPTION:
-                content = body_insertion(content, unsubscription, end=True)
-            if TRACKING_IMAGE:
-                content = body_insertion(content, image_tracking, end=True)
-
-        # --- template --- end ------------------------------------------------
+        if TRACKING_LINKS:
+            content = track_links(content, context)
 
         return smart_unicode(content)
 
@@ -318,7 +277,7 @@ class NewsLetterSender(object):
         """Check if the newsletter can be sent"""
         if self.test:
             return True
-        
+
         try:
             if settings.USE_TZ:
                 from django.utils.timezone import utc
@@ -357,7 +316,7 @@ class NewsLetterSender(object):
             contact.save()
         else:
             # signal error
-            print >>sys.stderr, 'smtp connection raises %s' % exception
+            print >> sys.stderr, 'smtp connection raises %s' % exception
             status = ContactMailingStatus.ERROR
 
         ContactMailingStatus.objects.create(

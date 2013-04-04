@@ -20,3 +20,5 @@ downloads/*
 src_eggs/*
 .idea
 .mr.developer.cfg
+.pydevproject
+.project
