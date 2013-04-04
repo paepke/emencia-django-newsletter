@@ -19,6 +19,7 @@ from emencia.django.newsletter.settings import BASE_PATH
 from emencia.django.newsletter.settings import MAILER_HARD_LIMIT
 from emencia.django.newsletter.settings import DEFAULT_HEADER_REPLY
 from emencia.django.newsletter.settings import DEFAULT_HEADER_SENDER
+from emencia.django.newsletter.settings import TEMPLATES
 from emencia.django.newsletter.utils.vcard import vcard_contact_export
 
 # Patch for Python < 2.6
@@ -221,6 +222,8 @@ class Newsletter(models.Model):
                                          'for unique identifier within the newsletter\'s title.'))
     content = models.TextField(_('content'), help_text=_('Or paste an URL.'),
                                default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'))
+
+    template = models.CharField(max_length=200, choices=TEMPLATES)
 
     mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'),

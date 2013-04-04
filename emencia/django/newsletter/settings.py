@@ -1,6 +1,7 @@
 """Settings for emencia.django.newsletter"""
 import string
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 BASE64_IMAGES = {
     'gif': 'AJEAAAAAAP///////wAAACH5BAEHAAIALAAAAAABAAEAAAICVAEAOw==',
@@ -40,6 +41,10 @@ RESTART_CONNECTION_BETWEEN_SENDING = getattr(
     settings, 'NEWSLETTER_RESTART_CONNECTION_BETWEEN_SENDING', False)
 
 BASE_PATH = getattr(settings, 'NEWSLETTER_BASE_PATH', 'upload/newsletter')
+
+TEMPLATES = getattr(settings, 'NEWSLETTER_TEMPLATES', None)
+if not TEMPLATES:
+    raise ImproperlyConfigured("Error loading templates: you must define NEWSLETTER_TEMPLATES into your settings")
 
 # NPH
 # Relative to MEDIA_ROOT
