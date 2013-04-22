@@ -185,7 +185,7 @@ if USE_TINYMCE:
     from tinymce.widgets import TinyMCE
 
     class NewsletterTinyMCEForm(forms.ModelForm):
-        content = forms.CharField(
+        content = forms.CharField(label=_('content'),
             widget=TinyMCE(attrs={'cols': 150, 'rows': 80}))
 
         class Meta:
