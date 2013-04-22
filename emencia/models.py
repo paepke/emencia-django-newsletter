@@ -258,7 +258,7 @@ class Newsletter(models.Model):
                              help_text=_('You can use the "{{ UNIQUE_KEY }}" variable ' \
                                          'for unique identifier within the newsletter\'s title.'))
 
-    template = models.CharField(max_length=200, choices=TEMPLATES, default=TEMPLATES[0][0])
+    template = models.CharField(verbose_name=_('template'), max_length=200, choices=TEMPLATES, default=TEMPLATES[0][0])
 
     mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'),
