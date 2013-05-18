@@ -22,7 +22,7 @@ def body_insertion(content, insertion, end=False):
         soup.body.append(insertion)
     else:
         soup.body.insert(0, insertion)
-
+  
     if USE_PRETTIFY:
         return soup.prettify()
     else:
