@@ -133,11 +133,13 @@ class ContactAdmin(admin.ModelAdmin):
                 contacts_imported.send(sender=self, source=source,
                                        type=request.POST['type'])
 
-            self.message_user(request, _('%s contacts succesfully imported.') % inserted)
+            self.message_user(
+                request, _('%s contacts succesfully imported.') % inserted
+            )
 
         context = {'title': _('Contact importation'),
                    'opts': opts,
-                   #~ 'root_path': self.admin_site.root_path,
+                   #~ 'root_path': self.admin_site.root_path,  TODO: Investigate this further
                    'root_path': reverse('admin:index'),
                    'app_label': opts.app_label}
 
@@ -155,31 +157,38 @@ class ContactAdmin(admin.ModelAdmin):
 
     def creation_mailinglist(self, request):
         """Create a mailing list form the filtered contacts"""
-        return self.create_mailinglist(request, self.filtered_request_queryset(request))
+        return self.create_mailinglist(request,
+                                       self.filtered_request_queryset(request))
 
     def exportation_vcard(self, request):
         """Export filtered contacts in VCard"""
-        return self.export_vcard(request, self.filtered_request_queryset(request),
-                                 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
+        return self.export_vcard(
+            request, self.filtered_request_queryset(request),
+            'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y')
+        )
 
     def exportation_excel(self, request):
         """Export filtered contacts in Excel"""
-        return self.export_excel(request, self.filtered_request_queryset(request),
-                                 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
+        return self.export_excel(
+            request, self.filtered_request_queryset(request),
+            'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y')
+        )
 
     def get_urls(self):
         urls = super(ContactAdmin, self).get_urls()
-        my_urls = patterns('',
-                           url(r'^import/$',
-                               self.admin_site.admin_view(self.importation),
-                               name='newsletter_contact_import'),
-                           url(r'^create_mailinglist/$',
-                               self.admin_site.admin_view(self.creation_mailinglist),
-                               name='newsletter_contact_create_mailinglist'),
-                           url(r'^export/vcard/$',
-                               self.admin_site.admin_view(self.exportation_vcard),
-                               name='newsletter_contact_export_vcard'),
-                           url(r'^export/excel/$',
-                               self.admin_site.admin_view(self.exportation_excel),
-                               name='newsletter_contact_export_excel'),)
+        my_urls = patterns(
+            '',
+            url(r'^import/$',
+                self.admin_site.admin_view(self.importation),
+                name='newsletter_contact_import'),
+            url(r'^create_mailinglist/$',
+                self.admin_site.admin_view(self.creation_mailinglist),
+                name='newsletter_contact_create_mailinglist'),
+            url(r'^export/vcard/$',
+                self.admin_site.admin_view(self.exportation_vcard),
+                name='newsletter_contact_export_vcard'),
+            url(r'^export/excel/$',
+                self.admin_site.admin_view(self.exportation_excel),
+                name='newsletter_contact_export_excel'),
+        )
         return my_urls + urls

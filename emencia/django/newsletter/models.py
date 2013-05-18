@@ -1,6 +1,10 @@
 """Models for emencia.django.newsletter"""
-from smtplib import SMTP, SMTPHeloError
-from datetime import datetime, timedelta
+from smtplib import SMTP
+from smtplib import SMTPHeloError
+from datetime import datetime
+from datetime import timedelta
+from inlinestyler.utils import inline_css
+from urllib2 import urlopen
 
 from django.db import models
 from django.utils.encoding import smart_str
@@ -13,9 +17,10 @@ from django.utils.encoding import force_unicode
 
 from tagging.fields import TagField
 from emencia.django.newsletter.managers import ContactManager
-from emencia.django.newsletter.settings \
-    import BASE_PATH, MAILER_HARD_LIMIT, DEFAULT_HEADER_REPLY, \
-        DEFAULT_HEADER_SENDER
+from emencia.django.newsletter.settings import BASE_PATH
+from emencia.django.newsletter.settings import MAILER_HARD_LIMIT
+from emencia.django.newsletter.settings import DEFAULT_HEADER_REPLY
+from emencia.django.newsletter.settings import DEFAULT_HEADER_SENDER
 from emencia.django.newsletter.utils.vcard import vcard_contact_export
 
 # --- subscriber verification --- start ---------------------------------------
@@ -47,16 +52,22 @@ class SMTPServer(models.Model):
     """Configuration of a SMTP server"""
     name = models.CharField(_('name'), max_length=255)
     host = models.CharField(_('server host'), max_length=255)
-    user = models.CharField(_('server user'), max_length=128, blank=True,
-                            help_text=_('Leave it empty if the host is public.'))
-    password = models.CharField(_('server password'), max_length=128, blank=True,
-                                help_text=_('Leave it empty if the host is public.'))
+    user = models.CharField(
+        _('server user'), max_length=128, blank=True,
+        help_text=_('Leave it empty if the host is public.')
+    )
+    password = models.CharField(
+        _('server password'), max_length=128, blank=True,
+        help_text=_('Leave it empty if the host is public.')
+    )
     port = models.IntegerField(_('server port'), default=25)
     tls = models.BooleanField(_('server use TLS'))
 
-    headers = models.TextField(_('custom headers'), blank=True,
-                               help_text=_('key1: value1 key2: value2, splitted by return line.\n'\
-                                           'Useful for passing some tracking headers if your provider allows it.'))
+    headers = models.TextField(
+        _('custom headers'), blank=True,
+        help_text=_('key1: value1 key2: value2, splitted by return line.\n'\
+        'Useful for passing some tracking headers if your provider allows it.')
+    )
     mails_hour = models.IntegerField(_('mails per hour'), default=0)
 
     def connect(self):
@@ -121,7 +132,9 @@ class Contact(models.Model):
         verified = models.BooleanField('verified', default=False)
     # --- subscriber verification --- end -------------------------------------
 
-    email = models.EmailField(_('email'), unique=True)
+    # email = models.EmailField(_('email'), unique=True)  ## Strycore removed
+    email = models.EmailField(_('email'))
+    owner = models.IntegerField(_('owner'), default=0)
     first_name = models.CharField(_('first name'), max_length=50, blank=True)
     last_name = models.CharField(_('last name'), max_length=50, blank=True)
 
@@ -171,6 +184,7 @@ class Contact(models.Model):
         return contact_name
 
     class Meta:
+        unique_together = ('email', 'owner')
         ordering = ('creation_date',)
         verbose_name = _('contact')
         verbose_name_plural = _('contacts')
@@ -183,11 +197,14 @@ class MailingList(models.Model):
     
     public = models.BooleanField(_('public'), default=False)
 
-    subscribers = models.ManyToManyField(Contact, verbose_name=_('subscribers'),
-                                         related_name='mailinglist_subscriber')
-    unsubscribers = models.ManyToManyField(Contact, verbose_name=_('unsubscribers'),
-                                           related_name='mailinglist_unsubscriber',
-                                           null=True, blank=True)
+    subscribers = models.ManyToManyField(
+        Contact, verbose_name=_('subscribers'),
+        related_name='mailinglist_subscriber'
+    )
+    unsubscribers = models.ManyToManyField(
+        Contact, verbose_name=_('unsubscribers'),
+        related_name='mailinglist_unsubscriber', null=True, blank=True
+    )
 
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
@@ -212,6 +229,24 @@ class MailingList(models.Model):
         ordering = ('-creation_date',)
         verbose_name = _('mailing list')
         verbose_name_plural = _('mailing lists')
+
+
+class MailingListSegment(models.Model):
+    name = models.CharField(_('name'), max_length=255)
+    mailing_list = models.ForeignKey(MailingList, null=False,
+                                     related_name="segments")
+    position = models.IntegerField(default=1)
+    subscribers = models.ManyToManyField(Contact,
+                                         verbose_name=_('subscribers'))
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('position', )
+
+    def subscribers_count(self):
+        return self.subscribers.all().count()
 
 
 class Newsletter(models.Model):
@@ -269,10 +304,17 @@ class Newsletter(models.Model):
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
     sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
 
-    slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'),
-                            unique=True)
+    slug = models.SlugField(
+        help_text=_('Used for displaying the newsletter on the site.'),
+        unique=True
+    )
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
+
+    def status_str(self):
+        for (code, string) in self.STATUS_CHOICES:
+            if code == self.status:
+                return string
 
     def mails_sent(self):
         return self.contactmailingstatus_set.filter(status=ContactMailingStatus.SENT).count()
@@ -293,6 +335,13 @@ class Newsletter(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.content.startswith('http://'):
+            url = self.content.strip()
+            html_page = urlopen(url).read()
+            self.content = inline_css(html_page, url)
+        super(Newsletter, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('-creation_date',)
@@ -387,13 +436,15 @@ class WorkGroup(models.Model):
     """Work Group for privatization of the ressources"""
     name = models.CharField(_('name'), max_length=255)
     group = models.ForeignKey(Group, verbose_name=_('permissions group'))
-
-    contacts = models.ManyToManyField(Contact, verbose_name=_('contacts'),
-                                      blank=True, null=True)
-    mailinglists = models.ManyToManyField(MailingList, verbose_name=_('mailing lists'),
-                                          blank=True, null=True)
-    newsletters = models.ManyToManyField(Newsletter, verbose_name=_('newsletters'),
-                                         blank=True, null=True)
+    contacts = models.ManyToManyField(
+        Contact, verbose_name=_('contacts'), blank=True, null=True
+    )
+    mailinglists = models.ManyToManyField(
+        MailingList, verbose_name=_('mailing lists'), blank=True, null=True
+    )
+    newsletters = models.ManyToManyField(
+        Newsletter, verbose_name=_('newsletters'), blank=True, null=True
+    )
 
     def __unicode__(self):
         return self.name

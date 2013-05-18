@@ -11,7 +11,7 @@ from emencia.django.newsletter.models import Newsletter
 from emencia.django.newsletter.models import Attachment
 from emencia.django.newsletter.models import MailingList
 from emencia.django.newsletter.mailer import Mailer
-from emencia.django.newsletter.settings import USE_TINYMCE
+from emencia.django.newsletter.settings import USE_TINYMCE, USE_CKEDITOR
 from emencia.django.newsletter.settings import USE_WORKGROUPS
 try:
     CAN_USE_PREMAILER = True
@@ -119,7 +119,13 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         if not request.user.has_perm('newsletter.can_change_status'):
             newsletter.status = form.initial.get('status', Newsletter.DRAFT)
 
-        newsletter.save()
+        try:
+            newsletter.save()
+        except:
+            self.message_user(
+                request,
+                _('Unable to download HTML, due to errors within.')
+            )
 
         for workgroup in workgroups:
             workgroup.newsletters.add(newsletter)
@@ -202,6 +208,20 @@ if USE_TINYMCE:
 
     class NewsletterAdmin(BaseNewsletterAdmin):
         form = NewsletterTinyMCEForm
+        
+elif USE_CKEDITOR:
+    from ckeditor.widgets import CKEditorWidget
+    
+    class NewsletterCKEditorForm(forms.ModelForm):
+        content = forms.CharField(
+            widget=CKEditorWidget())
+
+        class Meta:
+            model = Newsletter
+
+    class NewsletterAdmin(BaseNewsletterAdmin):
+        form = NewsletterCKEditorForm
+    
 else:
     class NewsletterAdmin(BaseNewsletterAdmin):
         pass
