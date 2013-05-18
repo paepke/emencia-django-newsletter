@@ -165,7 +165,13 @@ class Contact(models.Model):
 
     def mail_format(self):
         if self.first_name and self.last_name:
-            return '%s %s <%s>' % (self.first_name, self.last_name, self.email)
+            # return '%s %s <%s>' % (self.first_name, self.last_name, self.email)
+            # Applying cdchen's fix - https://github.com/cdchen/emencia-django-newsletter/commit/bd98653d92a442be2fdd044c6d8c59ab00a5bc7d
+            return '"%s %s" <%s>' % (
+                unicode(self.last_name).encode('utf-8'),
+                unicode(self.first_name).encode('utf-8'),
+                unicode(self.email).encode('utf-8')
+            )
         return self.email
     mail_format.short_description = _('mail format')
 

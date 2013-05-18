@@ -260,7 +260,7 @@ class NewsLetterSender(object):
         try:
             from django.utils.timezone import utc
             now = datetime.utcnow().replace(tzinfo=utc)
-            now = datetime.now()
+            # now = datetime.now()  TODO: This appears redundant, and in contrast to https://github.com/euricojardim/emencia-django-newsletter/commit/9fdd25c930e675aa68660262318a4d36db795301
         except:
             now = datetime.now()
 
