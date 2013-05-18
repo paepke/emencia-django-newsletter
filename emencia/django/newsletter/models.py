@@ -1,5 +1,5 @@
 """Models for emencia.django.newsletter"""
-from smtplib import SMTP
+from smtplib import SMTP, SMTP_SSL
 from smtplib import SMTPHeloError
 from datetime import datetime
 from datetime import timedelta
@@ -72,6 +72,7 @@ class SMTPServer(models.Model):
 
     def connect(self):
         """Connect the SMTP Server"""
+        # Modified via https://github.com/YuChem/emencia-django-newsletter/commit/492f3d58b82e35a1e042c8425352ae533da6ac76
         smtp = SMTP(smart_str(self.host), int(self.port))
         smtp.ehlo_or_helo_if_needed()
         if self.tls:
