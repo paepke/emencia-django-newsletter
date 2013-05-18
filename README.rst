@@ -71,6 +71,7 @@ Make sure to install these packages prior to installation :
  * vobject
  * xlwt
  * xlrd
+ * inlinestyler
 
 The package below is optionnal but handy for rendering a webpage in your newsletter.
 

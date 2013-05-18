@@ -2,7 +2,8 @@
 <div id="unsubscription">
   <a name="unsubscription"></a>
   <p>
+    {% url "newsletter_mailinglist_unsubscribe" slug=newsletter.slug uidb36=uidb36 token=token as unsubscribe_url %}
     {% trans "For unsubscribing to this mailing list," %}
-    <a href="{% if uidb36 and token %}http://{{ domain }}{% url newsletter_mailinglist_unsubscribe slug=newsletter.slug,uidb36=uidb36,token=token %}{% else %}#{% endif %}">{% trans "click here" %}</a>.
+    <a href="{% if uidb36 and token %}http://{{ domain }}{{unsubscribe_url}}{% else %}#{% endif %}">{% trans "click here" %}</a>.
   </p>
 </div>
