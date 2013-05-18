@@ -5,7 +5,7 @@
 
 {% block bodyclass %}dashboard{% endblock %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% load adminmedia %}{% admin_media_prefix %}css/dashboard.css" />{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}admin/css/dashboard.css" />{% endblock %}
 
 {% block extrahead %}
 <script type="text/javascript" src="{{ STATIC_URL }}edn/js/jquery.js"></script>
@@ -35,7 +35,7 @@ function save_image() { OFC.jquery.popup('charts_view'); }
 $(document).ready(function(){
   swfobject.embedSWF("{{ STATIC_URL }}edn/swf/open-flash-chart.swf", "charts_view", "498", "350", "9.0.0",
                      "{{ STATIC_URL }}edn/js/swfobject/expressInstall.swf",
-                     {"data-file": "{% url newsletter_newsletter_charts object.slug %}"});
+                     {"data-file": "{% url 'newsletter_newsletter_charts' object.slug %}"});
 
   function reload_charts(charts_data) {
     swfobject.getObjectById("charts_view").load(charts_data);
@@ -81,9 +81,9 @@ $(document).ready(function(){
       <div id="charts_view"></div>
   </div>
   <div class="module" id="charts_options">
-    <form id="period_selector" action="{% url newsletter_newsletter_charts object.slug %}" method="post">
+    <form id="period_selector" action="{% url 'newsletter_newsletter_charts' object.slug %}" method="post">
       {% csrf_token %}
-      <table summary="{% trans "Consultation histogram" %}">
+      <table summary="{% trans 'Consultation histogram' %}">
 	<tr>
 	  <th scope="row" style="vertical-align: middle;">
 	    {% trans "Period" %} :
@@ -177,7 +177,7 @@ $(document).ready(function(){
     <div class="module" id="report-module">
       <h2>{% trans "Report" %}</h2>
       <h3>
-	<a href="{% url newsletter_newsletter_report object.slug %}">{% trans "Download CSV report" %}</a>
+	<a href="{% url 'newsletter_newsletter_report' object.slug %}">{% trans "Download CSV report" %}</a>
       </h3>
       <p></p>
     </div>
@@ -196,7 +196,7 @@ $(document).ready(function(){
     </div>
     <div class="module" id="top-links-module">
 	<h2>{% trans "Top Links" %}
-	  (<a href="{% url newsletter_newsletter_density object.slug %}">{% trans "Density map" %}</a>)
+	  (<a href="{% url 'newsletter_newsletter_density' object.slug %}">{% trans "Density map" %}</a>)
 	</h2>
 	<ul class="actionlist">
 	{% for top_link in stats.top_links %}
