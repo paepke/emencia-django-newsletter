@@ -47,26 +47,26 @@ $(document).ready(function() {
 <ul class="object-tools" id="custom-tools">
   {% if has_add_permission %}
   <li>
-    <a href="{% url admin:newsletter_contact_import %}" class="addlink">
+    <a href="{% url 'admin:newsletter_contact_import' %}" class="addlink">
       {% blocktrans with cl.opts.verbose_name as name %}Import {{ name }}s{% endblocktrans %}
     </a>
   </li>
   {% endif %}
   {% if perms.newsletter.add_mailinglist %}
   <li>
-    <a href="{% url admin:newsletter_contact_create_mailinglist %}" class="viewsitelink">
+    <a href="{% url 'admin:newsletter_contact_create_mailinglist' %}" class="viewsitelink">
       {% trans 'Add to a mailing list' %}
     </a>
   </li>
   {% endif %}
   {% if user.is_superuser %}
   <li>
-    <a href="{% url admin:newsletter_contact_export_vcard %}" class="viewsitelink">
+    <a href="{% url 'admin:newsletter_contact_export_vcard' %}" class="viewsitelink">
       {% blocktrans with cl.opts.verbose_name as name %}Export {{ name }} as VCard{% endblocktrans %}
     </a>
   </li>
   <li>
-    <a href="{% url admin:newsletter_contact_export_excel %}" class="viewsitelink">
+    <a href="{% url 'admin:newsletter_contact_export_excel' %}" class="viewsitelink">
       {% blocktrans with cl.opts.verbose_name as name %}Export {{ name }} as Excel{% endblocktrans %}
     </a>
   </li>
