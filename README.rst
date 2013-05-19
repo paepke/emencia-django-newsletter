@@ -323,7 +323,7 @@ sqlite command ::
 Work in progress
 ================
 
-My notes on work done so far, and work to be done... mostly to be done ;-)
+My (marshalc) notes on work done so far, and work to be done... mostly to be done ;-)
 
   * Combined the verification process into the basic subscription form.
      * Still needs the normal subscribe form modifying and the urls unmangling.
@@ -333,7 +333,13 @@ My notes on work done so far, and work to be done... mostly to be done ;-)
     install with too much of a mixed heritage for past upgrades to work easily.
   * Need to finish the code inspection and cleanup. PyCharm has identified 1312 issues (
     admittedly 1003 of them are spelling concerns!) for me to look through.
+  * HTML Link as content isn't presently working...
+  * What are Workgroups? How do they differ/compare with Segments?
+  * What does the Premailer do? Answer: Seems to be responsible for parsing html pages into content for the newsletter.
+     * Needs some work!
+  * Tidy up, understand and expand on what the Templates functionality does (or doesn't).
   * I want to add:
      * Mezzanine support - tie it into the blog system elegantly
      * WYSIWYG editor made active - several of the merges suggest work has been done on
        this, but I need to active and test it.
+        * Need to work out which packages have been used as the base for tinymce and ckeditor

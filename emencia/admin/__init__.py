@@ -1,4 +1,6 @@
-"""Admin for emencia"""
+"""
+Admin for emencia
+"""
 from django.contrib import admin
 from django.conf import settings
 
@@ -11,11 +13,12 @@ from emencia.models import MailingList
 from emencia.models import ContactMailingStatus
 
 from emencia.settings import USE_WORKGROUPS
+
 from emencia.admin.contact import ContactAdmin
-from emencia.admin.workgroup import WorkGroupAdmin
-from emencia.admin.newsletter import NewsletterAdmin
 from emencia.admin.smtpserver import SMTPServerAdmin
+from emencia.admin.newsletter import NewsletterAdmin
 from emencia.admin.mailinglist import MailingListAdmin
+from emencia.admin.workgroup import WorkGroupAdmin
 
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(SMTPServer, SMTPServerAdmin)
@@ -24,7 +27,6 @@ admin.site.register(MailingList, MailingListAdmin)
 
 if USE_WORKGROUPS:
     admin.site.register(WorkGroup, WorkGroupAdmin)
-
 
 class LinkAdmin(admin.ModelAdmin):
     list_display = ('title', 'url', 'creation_date')
