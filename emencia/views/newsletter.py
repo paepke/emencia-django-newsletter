@@ -18,7 +18,7 @@ from emencia.settings import TRACKING_LINKS
 
 # --- template --- start ------------------------------------------------------
 from django.template.loader import render_to_string
-from emencia.django.newsletter.settings import USE_TEMPLATE
+from emencia.settings import USE_TEMPLATE
 # --- template --- end --------------------------------------------------------
 
 def render_newsletter(request, slug, context):

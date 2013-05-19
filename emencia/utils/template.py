@@ -19,7 +19,7 @@ def get_templates():
         return ((i,i) for i in os.walk(
                 os.path.join(
                     get_app_template_dir(
-                        'emencia.django.newsletter',
+                        'emencia',
                         'templates'
                     ),
                     'mailtemplates'

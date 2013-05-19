@@ -1,7 +1,7 @@
 # views.py
 from django.http import HttpResponse
 from django.conf import settings
-from emencia.django.newsletter import settings as e_settings
+from emencia import settings as e_settings
 from filebrowser.base import FileObject
 
 import os
