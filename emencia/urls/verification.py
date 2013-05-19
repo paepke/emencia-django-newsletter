@@ -1,6 +1,6 @@
 # --- subscriber verification --- start ---------------------------------------
 """Urls for the emencia Subscriber Verification"""
-from django.conf.urls.defaults import url, patterns
+from django.conf.urls import url, patterns
 
 from emencia.forms \
     import SubscriberVerificationForm, VerificationMailingListSubscriptionForm
