@@ -67,12 +67,17 @@ class SMTPServer(models.Model):
 
     def connect(self):
         """Connect the SMTP Server"""
-        # Modified via https://github.com/YuChem/emencia-django-newsletter/commit/492f3d58b82e35a1e042c8425352ae533da6ac76
-        smtp = SMTP(smart_str(self.host), int(self.port))
-        smtp.ehlo_or_helo_if_needed()
-        if self.tls:
-            smtp.starttls()
+        # Modified: https://github.com/YuChem/emencia-django-newsletter/commit/492f3d58b82e35a1e042c8425352ae533da6ac76
+        if self.port == 465:
+            smtp = SMTP_SSL(smart_str(self.host), int(self.port))
+        else:
+            smtp = SMTP(smart_str(self.host), int(self.port))
             smtp.ehlo_or_helo_if_needed()
+
+            if self.tls:
+                smtp.starttls()
+
+        smtp.ehlo_or_helo_if_needed()
 
         if self.user or self.password:
             smtp.login(smart_str(self.user), smart_str(self.password))
