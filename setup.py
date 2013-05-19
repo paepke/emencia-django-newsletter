@@ -2,15 +2,15 @@ import os
 from setuptools import setup
 from setuptools import find_packages
 
-from emencia.django import newsletter
+import emencia
 
 
-setup(name='emencia.django.newsletter',
-      version=newsletter.__version__,
-      description='A Django app for sending newsletter by email to a contact list.',
+setup(name='emencia',
+      version=emencia.__version__,
+      description='A Django app for sending emencia by email to a contact list.',
       long_description=open('README.rst').read() + '\n' +
                        open(os.path.join('docs', 'HISTORY.txt')).read(),
-      keywords='django, newsletter, mailing',
+      keywords='django, emencia, mailing',
       classifiers=[
           'Framework :: Django',
           'Programming Language :: Python',
@@ -21,19 +21,19 @@ setup(name='emencia.django.newsletter',
           'Development Status :: 5 - Production/Stable',
           'Topic :: Software Development :: Libraries :: Python Modules',],
 
-      author=newsletter.__author__,
-      author_email=newsletter.__email__,
-      url=newsletter.__url__,
+      author=emencia.__author__,
+      author_email=emencia.__email__,
+      url=emencia.__url__,
 
-      license=newsletter.__license__,
+      license=emencia.__license__,
       packages=find_packages(exclude=['demo']),
-      namespace_packages=['emencia'],
+      namespace_packages=['emencia',],
       include_package_data=True,
       zip_safe=False,
       install_requires=['setuptools',
                         'html2text',
                         'python-dateutil==1.5',
-                        'BeautifulSoup',
+                        'beautifulsoup4',
                         'django-tagging',
                         'vobject',
                         'xlwt',
