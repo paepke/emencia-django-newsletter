@@ -322,7 +322,19 @@ sqlite command ::
 
 
 Work in progress
-----------------
+================
+
+My notes on work done so far, and work to be done... mostly to be done ;-)
+
   * Combined the verification process into the basic subscription form.
-    * Still needs the normal subscribe form modifying and the urls unmangling.
-    * Also needs to be able to sign up for specific mailing lists (public and private?)
+     * Still needs the normal subscribe form modifying and the urls unmangling.
+     * Also needs to be able to sign up for specific mailing lists (public and private?)
+  * Need to update and consolidate the documentation from the various merged branches
+  * Have removed all the previous merged migrations, since this is effectively a clean
+    install with too much of a mixed heritage for past upgrades to work easily.
+  * Need to finish the code inspection and cleanup. PyCharm has identified 1312 issues (
+    admittedly 1003 of them are spelling concerns!) for me to look through.
+  * I want to add:
+     * Mezzanine support - tie it into the blog system elegantly
+     * WYSIWYG editor made active - several of the merges suggest work has been done on
+       this, but I need to active and test it.
