@@ -22,6 +22,8 @@ MAILER_HARD_LIMIT = getattr(settings, 'NEWSLETTER_MAILER_HARD_LIMIT', 10000)
 
 INCLUDE_UNSUBSCRIPTION = getattr(settings, 'NEWSLETTER_INCLUDE_UNSUBSCRIPTION', True)
 
+UNSUBSCRIBE_ALL = getattr(settings, 'NEWSLETTER_UNSUBSCRIBE_ALL', False)
+
 UNIQUE_KEY_LENGTH = getattr(settings, 'NEWSLETTER_UNIQUE_KEY_LENGTH', 8)
 UNIQUE_KEY_CHAR_SET = getattr(settings, 'NEWSLETTER_UNIQUE_KEY_CHAR_SET', string.ascii_uppercase + string.digits)
 
@@ -31,7 +33,6 @@ DEFAULT_HEADER_REPLY = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_REPLY',
                                DEFAULT_HEADER_SENDER)
 
 TRACKING_LINKS = getattr(settings, 'NEWSLETTER_TRACKING_LINKS', True)
-
 TRACKING_IMAGE_FORMAT = getattr(settings, 'NEWSLETTER_TRACKING_IMAGE_FORMAT', 'jpg')
 TRACKING_IMAGE = getattr(settings, 'NEWSLETTER_TRACKING_IMAGE',
                          BASE64_IMAGES[TRACKING_IMAGE_FORMAT])
@@ -41,24 +42,10 @@ SLEEP_BETWEEN_SENDING = getattr(
 RESTART_CONNECTION_BETWEEN_SENDING = getattr(
     settings, 'NEWSLETTER_RESTART_CONNECTION_BETWEEN_SENDING', False)
 
-BASE_PATH = getattr(settings, 'NEWSLETTER_BASE_PATH', 'uploads/newsletter')
+BASE_PATH = getattr(settings, 'NEWSLETTER_BASE_PATH', 'upload/newsletter')
 
-# --- tracking ignore anchor --- start ----------------------------------------
-TRACKING_IGNORE_ANCHOR = getattr(
-    settings,
-    'NEWSLETTER_TRACKING_IGNORE_ANCHOR',
-    False
-)
-# --- tracking ignore anchor --- end ------------------------------------------
-
-# --- subscriber verification --- start ---------------------------------------
-SUBSCRIBER_VERIFICATION = getattr(
-    settings,
-    'NEWSLETTER_SUBSCRIBER_VERIFICATION',
-    True
-)
-# --- subscriber verification --- end -----------------------------------------
-
-# --- templates --- start -----------------------------------------------------
-USE_TEMPLATE = getattr( settings, 'NEWSLETTER_USE_TEMPLATE', True)
-# --- templates --- end -------------------------------------------------------
+# NPH
+# Relative to MEDIA_ROOT
+FILEBROWSER_DIRECTORY = getattr(settings, 'FILEBROWSER_DIRECTORY', 'upload/')
+NEWSLETTER_TINYMCE_TEMPLATE_DIR = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_DIR', 'upload/tinymce/templates/')
+NEWSLETTER_TINYMCE_TEMPLATE_URL = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_URL', '/tinymce/templates/')

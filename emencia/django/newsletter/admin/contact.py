@@ -148,8 +148,10 @@ class ContactAdmin(admin.ModelAdmin):
 
     def filtered_request_queryset(self, request):
         """Return queryset filtered by the admin list view"""
-        cl = ChangeList(request, self.model, self.list_display,
-                        self.list_display_links, self.list_filter,
+        list_display = self.get_list_display(request)
+        list_display_links = self.get_list_display_links(request, list_display)
+        cl = ChangeList(request, self.model, list_display,
+                        list_display_links, self.list_filter,
                         self.date_hierarchy, self.search_fields,
                         self.list_select_related, self.list_per_page,
                         self.list_editable, self.list_max_show_all, self)

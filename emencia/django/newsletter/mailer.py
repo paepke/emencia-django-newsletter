@@ -32,6 +32,7 @@ from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
+from django.conf import settings
 
 from emencia.django.newsletter.models import Newsletter
 from emencia.django.newsletter.models import ContactMailingStatus
@@ -256,11 +257,13 @@ class NewsLetterSender(object):
         """Check if the newsletter can be sent"""
         if self.test:
             return True
-
+        
         try:
-            from django.utils.timezone import utc
-            now = datetime.utcnow().replace(tzinfo=utc)
-            # now = datetime.now()  TODO: This appears redundant, and in contrast to https://github.com/euricojardim/emencia-django-newsletter/commit/9fdd25c930e675aa68660262318a4d36db795301
+            if settings.USE_TZ:
+                from django.utils.timezone import utc
+                now = datetime.utcnow().replace(tzinfo=utc)
+            else:
+                now = datetime.now()
         except:
             now = datetime.now()
 
@@ -314,6 +317,8 @@ class Mailer(NewsLetterSender):
             self.smtp_connect()
 
         self.attachments = self.build_attachments()
+        start = datetime.now()
+        delay = self.newsletter.server.delay()
 
         expedition_list = self.expedition_list
 
@@ -346,8 +351,11 @@ class Mailer(NewsLetterSender):
 
             self.update_contact_status(contact, exception)
 
-            if SLEEP_BETWEEN_SENDING:
-                time.sleep(SLEEP_BETWEEN_SENDING)
+            sleep_time = (delay * i -
+                          total_seconds(datetime.now() - start))
+
+            if SLEEP_BETWEEN_SENDING and sleep_time:
+                time.sleep(sleep_time)
             if RESTART_CONNECTION_BETWEEN_SENDING:
                 self.smtp.quit()
                 self.smtp_connect()
@@ -402,7 +410,6 @@ class SMTPMailer(object):
         """send mails
         """
         sending = dict()
-        candidates = self.get_candidates()
         roundrobin = []
 
         if not self.smtp:
@@ -415,6 +422,7 @@ class SMTPMailer(object):
         while (not self.stop_event.wait(sleep_time) and
                not self.stop_event.is_set()):
             if not roundrobin:
+                candidates = self.get_candidates()
                 # refresh the list
                 for expedition in candidates:
                     if expedition.id not in sending and expedition.can_send:
@@ -426,6 +434,9 @@ class SMTPMailer(object):
                 nl_id = roundrobin.pop()
                 nl = sending[nl_id]
 
+                if i == 1:
+                    self.smtp.quit()
+                    self.smtp_connect()
                 try:
                     self.smtp.sendmail(*nl.next())
                 except StopIteration:
@@ -445,7 +456,7 @@ class SMTPMailer(object):
                 i += 1
             else:
                 # no work, sleep a bit and some reset
-                sleep_time = 600
+                sleep_time = 6
                 i = 1
                 self.start = datetime.now()
 
