@@ -1,4 +1,6 @@
-"""ModelAdmin for Newsletter"""
+"""
+ModelAdmin for Newsletter
+"""
 from HTMLParser import HTMLParseError
 
 from django import forms
@@ -14,6 +16,7 @@ from emencia.mailer import Mailer
 from emencia.settings import USE_TINYMCE, USE_CKEDITOR
 from emencia.settings import USE_WORKGROUPS
 from emencia.settings import TINYMCE_WIDGET_ATTRS
+from emencia.settings import USE_TEMPLATE
 try:
     CAN_USE_PREMAILER = True
     from emencia.utils.premailer import Premailer
@@ -25,9 +28,6 @@ from emencia.utils.workgroups import request_workgroups_contacts_pk
 from emencia.utils.workgroups import request_workgroups_newsletters_pk
 from emencia.utils.workgroups import request_workgroups_mailinglists_pk
 
-# --- templates --- start -----------------------------------------------------
-from emencia.settings import USE_TEMPLATE
-# --- templates --- end -------------------------------------------------------
 
 class AttachmentAdminInline(admin.TabularInline):
     model = Attachment
@@ -37,23 +37,21 @@ class AttachmentAdminInline(admin.TabularInline):
 
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('title', 'mailing_list', 'server', 'status',
-                    'sending_date', 'creation_date', 'modification_date',
-                    'historic_link', 'statistics_link')
+    list_display = (
+        'title', 'mailing_list', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',
+        'historic_link', 'statistics_link'
+    )
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'content', 'header_sender', 'header_reply')
     filter_horizontal = ['test_contacts']
-    fieldsets = ((None, {'fields': ['title', 'content', 'public',]}),
-                 (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
-                 (_('Sending'), {'fields': ('sending_date', 'status',)}),
-                 (_('Miscellaneous'), {'fields': ('server', 'header_sender',
-                                                  'header_reply', 'slug'),
-                                       'classes': ('collapse',)}),
+    fieldsets = (
+        (None, {'fields': ['title', 'content', 'public',]}),
+        (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
+        (_('Sending'), {'fields': ('sending_date', 'status',)}),
+        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
                 )
-    # --- templates --- start -------------------------------------------------
     if USE_TEMPLATE:
         fieldsets[0][1]['fields'].append('template')
-    # --- templates --- end ---------------------------------------------------
 
     prepopulated_fields = {'slug': ('title',)}
     inlines = (AttachmentAdminInline,)
@@ -76,8 +74,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         return queryset
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'mailing_list' and \
-               not request.user.is_superuser and USE_WORKGROUPS:
+        if db_field.name == 'mailing_list' and not request.user.is_superuser and USE_WORKGROUPS:
             mailinglists_pk = request_workgroups_mailinglists_pk(request)
             kwargs['queryset'] = MailingList.objects.filter(pk__in=mailinglists_pk)
             return db_field.formfield(**kwargs)
@@ -85,8 +82,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
             db_field, request, **kwargs)
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
-        if db_field.name == 'status' and \
-               not request.user.has_perm('emencia.can_change_status'):
+        if db_field.name == 'status' and not request.user.has_perm('emencia.can_change_status'):
             kwargs['choices'] = ((Newsletter.DRAFT, _('Default')),)
             return db_field.formfield(**kwargs)
         return super(BaseNewsletterAdmin, self).formfield_for_choice_field(
@@ -104,8 +100,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
 
     def save_model(self, request, newsletter, form, change):
         workgroups = []
-        if not newsletter.pk and not request.user.is_superuser \
-               and USE_WORKGROUPS:
+        if not newsletter.pk and not request.user.is_superuser and USE_WORKGROUPS:
             workgroups = request_workgroups(request)
 
         if newsletter.content.startswith('http://'):
@@ -141,8 +136,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
 
     def statistics_link(self, newsletter):
         """Display link for statistics"""
-        if newsletter.status == Newsletter.SENDING or \
-           newsletter.status == Newsletter.SENT:
+        if newsletter.status == Newsletter.SENDING or newsletter.status == Newsletter.SENT:
             return u'<a href="%s">%s</a>' % (newsletter.get_statistics_url(), _('View statistics'))
         return _('Not available')
     statistics_link.allow_tags = True
@@ -194,7 +188,6 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         self.message_user(request, _('%s newletters are cancelled') % queryset.count())
     make_cancel_sending.short_description = _('Cancel the sending')
 
-    # --- duplicate newsletter --- start --------------------------------------
     def duplicate(self, request, queryset):
         """Duplicate selected newsletters"""
         for newsletter in queryset:
@@ -205,9 +198,6 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
             newsletter.slug = u'%s-%s' % (newsletter.slug, i)
             newsletter.title = u'%s [%s]' % (newsletter.title, i)
             newsletter.save()
-        
-    # --- duplicate newsletter --- end ----------------------------------------
-
 
 if USE_TINYMCE:
     from tinymce.widgets import TinyMCE

@@ -1,14 +1,19 @@
-"""ModelAdmin for WorkGroup"""
+"""
+ModelAdmin for WorkGroup
+"""
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
 
 class WorkGroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'group', 'contacts_length',
-                    'mailinglists_length', 'newsletters_length')
-    fieldsets = ((None, {'fields': ('name', 'group')}),
-                 (None, {'fields': ('contacts', 'mailinglists', 'newsletters')}),
-                 )
+    list_display = (
+        'name', 'group', 'contacts_length',
+        'mailinglists_length', 'newsletters_length'
+    )
+    fieldsets = (
+        (None, {'fields': ('name', 'group')}),
+        (None, {'fields': ('contacts', 'mailinglists', 'newsletters')}),
+    )
     filter_horizontal = ['contacts', 'mailinglists', 'newsletters']
     actions_on_top = False
     actions_on_bottom = True

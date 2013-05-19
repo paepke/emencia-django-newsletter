@@ -1,6 +1,8 @@
-"""Premailer for emencia
+"""
+Premailer for emencia
 Used for converting a page with CSS inline and links corrected.
-Based on http://www.peterbe.com/plog/premailer.py"""
+Based on http://www.peterbe.com/plog/premailer.py
+"""
 import re
 from urllib2 import urlopen
 from lxml.html import parse
@@ -29,6 +31,13 @@ def _merge_styles(old, new, class_=''):
     Note: old could be something like '{...} ::first-letter{...}'
     """
     news = {}
+    """
+    Bit of a problem splitting on ; when it can appear within other elements...
+    k	    -  'background-image'
+    class_	- ''
+    v	    - 'url("data:image/png'
+    new	    - 'background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATUAAABkCAMAAADQZFfQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF6urqAAAAyR7/CQAAADlJREFUeNrswYEAAAAAw6D5U1/hAFUBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB8JoAAAwB5GAABbwqEtAAAAABJRU5ErkJggg==");background-position:right top;background-repeat:repeat-y'
+    """
     for k, v in [x.strip().split(':', 1) for x in new.split(';') if x.strip()]:
         news[k.strip()] = v.strip()
 
@@ -73,9 +82,14 @@ def _merge_styles(old, new, class_=''):
         return ' '.join([x for x in all if x != '{}'])
 
 
+class PremailerError(Exception):
+    pass
+
+
 class Premailer(object):
-    """Premailer for converting a webpage
-    to be e-mail ready"""
+    """
+    Premailer for converting a webpage to be e-mail ready
+    """
 
     def __init__(self, url, include_star_selectors=False):
         self.url = url
@@ -84,8 +98,9 @@ class Premailer(object):
         self.include_star_selectors = include_star_selectors
 
     def transform(self):
-        """Do some transformations to self.page
-        for being e-mail compliant"""
+        """
+        Do some transformations to self.page for being e-mail compliant
+        """
         self.page.make_links_absolute(self.url)
 
         self.inline_rules(self.get_page_rules())
@@ -99,8 +114,9 @@ class Premailer(object):
         return tostring(self.page.body)
 
     def get_page_rules(self):
-        """Retrieve CSS rules in the <style> markups
-        and in the external CSS files"""
+        """
+        Retrieve CSS rules in the <style> markups and in the external CSS files
+        """
         rules = []
         for style in self.page.cssselect('style'):
             css_body = tostring(style)
@@ -172,10 +188,9 @@ class Premailer(object):
         return rules, leftover
 
     def _style_to_basic_html_attributes(self, element, style_content):
-        """Given an element and styles like
-        'background-color:red; font-family:Arial' turn some of that into HTML
-        attributes. like 'bgcolor', etc.
-        Note, the style_content can contain pseudoclasses like:
+        """
+        Given an element and styles like 'background-color:red; font-family:Arial' turn some of that into HTML
+        attributes. like 'bgcolor', etc. Note, the style_content can contain pseudoclasses like:
         '{color:red; border:1px solid green} :visited{border:1px solid green}'
         """
         if style_content.count('}') and \
