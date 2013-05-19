@@ -7,7 +7,7 @@ BASE64_IMAGES = {
     'gif': 'AJEAAAAAAP///////wAAACH5BAEHAAIALAAAAAABAAEAAAICVAEAOw==',
     'png': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABBJREFUeNpi+P//PwNAgAEACPwC/tuiTRYAAAAASUVORK5CYII=',
     'jpg': '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBAQFBAYFBQYJBgUGCQsIBgYICwwKCgsKCgwQDAwMDAwMEAwODxAPDgwTExQUExMcGxsbHCAgICAgICAgICD/2wBDAQcHBw0MDRgQEBgaFREVGiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICD/wAARCAABAAEDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AVIP/2Q=='
-    }
+}
 
 USE_WORKGROUPS = getattr(settings, 'NEWSLETTER_USE_WORKGROUPS', False)
 USE_UTM_TAGS = getattr(settings, 'NEWSLETTER_USE_UTM_TAGS', True)
@@ -16,7 +16,7 @@ USE_TINYMCE = getattr(settings, 'NEWSLETTER_USE_TINYMCE',
 TINYMCE_WIDGET_ATTRS = getattr(settings, 'TINYMCE_WIDGET_ATTRS', {'cols': 150, 'rows': 80})
 
 USE_CKEDITOR = getattr(settings, 'NEWSLETTER_USE_CKEDITOR',
-                      'ckeditor' in settings.INSTALLED_APPS)
+                       'ckeditor' in settings.INSTALLED_APPS)
 
 USE_PRETTIFY = getattr(settings, 'NEWSLETTER_USE_PRETTIFY', True)
 
@@ -73,3 +73,23 @@ if not TEMPLATES:
 FILEBROWSER_DIRECTORY = getattr(settings, 'FILEBROWSER_DIRECTORY', 'upload/')
 NEWSLETTER_TINYMCE_TEMPLATE_DIR = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_DIR', 'upload/tinymce/templates/')
 NEWSLETTER_TINYMCE_TEMPLATE_URL = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_URL', '/tinymce/templates/')
+
+# --- tracking ignore anchor --- start ----------------------------------------
+TRACKING_IGNORE_ANCHOR = getattr(
+    settings,
+    'NEWSLETTER_TRACKING_IGNORE_ANCHOR',
+    False
+)
+# --- tracking ignore anchor --- end ------------------------------------------
+
+# --- subscriber verification --- start ---------------------------------------
+SUBSCRIBER_VERIFICATION = getattr(
+    settings,
+    'NEWSLETTER_SUBSCRIBER_VERIFICATION',
+    True
+)
+# --- subscriber verification --- end -----------------------------------------
+
+# --- templates --- start -----------------------------------------------------
+USE_TEMPLATE = getattr( settings, 'NEWSLETTER_USE_TEMPLATE', True)
+# --- templates --- end -------------------------------------------------------
