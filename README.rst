@@ -322,5 +322,6 @@ sqlite command ::
 
 Work in progress
 ----------------
-  * Combined the verification process into the basic subscription form. Still needs the normal subscribe form modifying
-    and the urls unmangling.
+  * Combined the verification process into the basic subscription form.
+    * Still needs the normal subscribe form modifying and the urls unmangling.
+    * Also needs to be able to sign up for specific mailing lists (public and private?)
