@@ -317,3 +317,10 @@ and add the column vriefied to newsletter_contact.
 
 sqlite command ::
     ALTER TABLE newsletter_contact ADD COLUMN verified bool;
+
+
+
+Work in progress
+----------------
+  * Combined the verification process into the basic subscription form. Still needs the normal subscribe form modifying
+    and the urls unmangling.

@@ -48,12 +48,8 @@ from emencia.settings import UNIQUE_KEY_CHAR_SET
 from emencia.settings import INCLUDE_UNSUBSCRIPTION
 from emencia.settings import INCLUDE_SITE_LINKS
 from emencia.settings import SLEEP_BETWEEN_SENDING
-from emencia.settings import \
-     RESTART_CONNECTION_BETWEEN_SENDING
-
-# --- subscriber verification --- start ---------------------------------------
+from emencia.settings import RESTART_CONNECTION_BETWEEN_SENDING
 from emencia.settings import SUBSCRIBER_VERIFICATION
-# --- subscriber verification --- end -----------------------------------------
 
 if not hasattr(timedelta, 'total_seconds'):
     def total_seconds(td):
@@ -64,7 +60,7 @@ else:
     total_seconds = lambda td: td.total_seconds()
 
 # --- template --- start ------------------------------------------------------
-from emencia.django.newsletter.settings import USE_TEMPLATE
+from emencia.settings import USE_TEMPLATE
 # --- template --- end --------------------------------------------------------
 
 LINK_RE = re.compile(r"https?://([^ \n]+\n)+[^ \n]+", re.MULTILINE)
@@ -217,9 +213,7 @@ class NewsLetterSender(object):
 
     def build_email_content(self, contact):
         """Generate the mail for a contact"""
-        # --- template --- start ----------------------------------------------
         link_site = unsubscription = image_tracking = ''
-        # --- template --- end ------------------------------------------------
 
         uidb36, token = tokenize(contact)
 
@@ -357,6 +351,11 @@ class Mailer(NewsLetterSender):
 
         i = 1
         for contact in expedition_list:
+            if SUBSCRIBER_VERIFICATION:
+                if not contact.verified:
+                    print '- No verified email: {0}'.format(contact.email)
+                    continue
+
             if self.verbose:
                 print '- Processing %s/%s (%s)' % (
                     i, number_of_recipients, contact.pk)

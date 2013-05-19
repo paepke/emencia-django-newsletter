@@ -17,16 +17,6 @@ from emencia.admin.newsletter import NewsletterAdmin
 from emencia.admin.smtpserver import SMTPServerAdmin
 from emencia.admin.mailinglist import MailingListAdmin
 
-# --- subscriber verification --- start ---------------------------------------
-from emencia.settings import SUBSCRIBER_VERIFICATION
-
-if SUBSCRIBER_VERIFICATION:
-    from emencia.models import SubscriberVerification
-    from emencia.admin.verification \
-        import SubscriberVerificationAdmin
-# --- subscriber verification --- end -----------------------------------------
-
-
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(SMTPServer, SMTPServerAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)

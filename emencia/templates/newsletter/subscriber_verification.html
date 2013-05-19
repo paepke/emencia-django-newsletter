@@ -13,7 +13,7 @@
     <p>{% trans "Thanks for your email subscription!" %}</p>
 {% else %}
     <p>{% trans "Validate this form to subscribe to the newsletter." %}</p>
-    <form action="../../django/newsletter/templates/newsletter" method="post">
+    <form action="" method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="{% trans "Subscribe" %}" />

@@ -1,4 +1,3 @@
-<<<<<<< HEAD:emencia/models.py
 """Models for emencia"""
 from smtplib import SMTP, SMTP_SSL
 from smtplib import SMTPHeloError
@@ -134,6 +133,7 @@ class Contact(models.Model):
     # --- subscriber verification --- end -------------------------------------
 
     email = models.EmailField(_('email'))
+    verified = models.BooleanField('verified', default=False)
     owner = models.IntegerField(_('owner'), default=0)
 
     first_name = models.CharField(_('first name'), max_length=50, blank=True)
