@@ -337,6 +337,7 @@ My (marshalc) notes on work done so far, and work to be done... mostly to be don
   * What are Workgroups? How do they differ/compare with Segments?
   * What does the Premailer do? Answer: Seems to be responsible for parsing html pages into content for the newsletter.
      * Needs some work!
+     * Go look at https://github.com/kapt/emencia-django-newsletter/commit/837a3a35c0bdb5bda1ec6e9c73db35cf8156496c for some inspiration
   * Tidy up, understand and expand on what the Templates functionality does (or doesn't).
   * I want to add:
      * Mezzanine support - tie it into the blog system elegantly
