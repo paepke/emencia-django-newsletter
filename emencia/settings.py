@@ -10,12 +10,10 @@ BASE64_IMAGES = {
 
 USE_WORKGROUPS = getattr(settings, 'NEWSLETTER_USE_WORKGROUPS', False)
 USE_UTM_TAGS = getattr(settings, 'NEWSLETTER_USE_UTM_TAGS', True)
-USE_TINYMCE = getattr(settings, 'NEWSLETTER_USE_TINYMCE',
-                      'tinymce' in settings.INSTALLED_APPS)
+USE_TINYMCE = getattr(settings, 'NEWSLETTER_USE_TINYMCE', 'tinymce' in settings.INSTALLED_APPS)
 TINYMCE_WIDGET_ATTRS = getattr(settings, 'TINYMCE_WIDGET_ATTRS', {'cols': 150, 'rows': 80})
 
-USE_CKEDITOR = getattr(settings, 'NEWSLETTER_USE_CKEDITOR',
-                       'ckeditor' in settings.INSTALLED_APPS)
+USE_CKEDITOR = getattr(settings, 'NEWSLETTER_USE_CKEDITOR', 'ckeditor' in settings.INSTALLED_APPS)
 
 USE_PRETTIFY = getattr(settings, 'NEWSLETTER_USE_PRETTIFY', True)
 
@@ -29,20 +27,15 @@ UNSUBSCRIBE_ALL = getattr(settings, 'NEWSLETTER_UNSUBSCRIBE_ALL', False)
 UNIQUE_KEY_LENGTH = getattr(settings, 'NEWSLETTER_UNIQUE_KEY_LENGTH', 8)
 UNIQUE_KEY_CHAR_SET = getattr(settings, 'NEWSLETTER_UNIQUE_KEY_CHAR_SET', string.ascii_uppercase + string.digits)
 
-DEFAULT_HEADER_SENDER = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_SENDER',
-                                'Emencia Newsletter<noreply@emencia.com>')
-DEFAULT_HEADER_REPLY = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_REPLY',
-                               DEFAULT_HEADER_SENDER)
+DEFAULT_HEADER_SENDER = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_SENDER', 'Emencia Newsletter<noreply@emencia.com>')
+DEFAULT_HEADER_REPLY = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_REPLY', DEFAULT_HEADER_SENDER)
 
 TRACKING_LINKS = getattr(settings, 'NEWSLETTER_TRACKING_LINKS', True)
 TRACKING_IMAGE_FORMAT = getattr(settings, 'NEWSLETTER_TRACKING_IMAGE_FORMAT', 'jpg')
-TRACKING_IMAGE = getattr(settings, 'NEWSLETTER_TRACKING_IMAGE',
-                         BASE64_IMAGES[TRACKING_IMAGE_FORMAT])
+TRACKING_IMAGE = getattr(settings, 'NEWSLETTER_TRACKING_IMAGE', BASE64_IMAGES[TRACKING_IMAGE_FORMAT])
 
-SLEEP_BETWEEN_SENDING = getattr(
-    settings, 'NEWSLETTER_SLEEP_BETWEEN_SENDING', 0)
-RESTART_CONNECTION_BETWEEN_SENDING = getattr(
-    settings, 'NEWSLETTER_RESTART_CONNECTION_BETWEEN_SENDING', False)
+SLEEP_BETWEEN_SENDING = getattr(settings, 'NEWSLETTER_SLEEP_BETWEEN_SENDING', 0)
+RESTART_CONNECTION_BETWEEN_SENDING = getattr(settings, 'NEWSLETTER_RESTART_CONNECTION_BETWEEN_SENDING', False)
 
 BASE_PATH = getattr(settings, 'NEWSLETTER_BASE_PATH', 'upload/newsletter')
 
@@ -61,13 +54,9 @@ TRACKING_IGNORE_ANCHOR = getattr(
 # --- tracking ignore anchor --- end ------------------------------------------
 
 # --- subscriber verification --- start ---------------------------------------
-SUBSCRIBER_VERIFICATION = getattr(
-    settings,
-    'NEWSLETTER_SUBSCRIBER_VERIFICATION',
-    True
-)
+SUBSCRIBER_VERIFICATION = getattr(settings, 'NEWSLETTER_SUBSCRIBER_VERIFICATION', True)
 # --- subscriber verification --- end -----------------------------------------
 
 # --- templates --- start -----------------------------------------------------
-USE_TEMPLATE = getattr( settings, 'NEWSLETTER_USE_TEMPLATE', True)
+USE_TEMPLATE = getattr(settings, 'NEWSLETTER_USE_TEMPLATE', True)
 # --- templates --- end -------------------------------------------------------

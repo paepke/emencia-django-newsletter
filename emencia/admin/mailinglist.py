@@ -125,3 +125,12 @@ class MailingListAdmin(admin.ModelAdmin):
                 name='%s_mailinglist_export_excel' % self.opts.app_label),
         )
         return my_urls + urls
+
+# --- subscriber verification --- start ---------------------------------------
+from emencia.models import SubscriberVerification
+
+class SubscriberVerificationAdmin(admin.ModelAdmin):
+    fields = ['link_id', 'contact']
+
+admin.site.register(SubscriberVerification, SubscriberVerificationAdmin)
+# --- subscriber verification --- end -----------------------------------------
