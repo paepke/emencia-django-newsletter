@@ -10,6 +10,7 @@ from StringIO import StringIO
 from datetime import datetime
 from datetime import timedelta
 from smtplib import SMTPRecipientsRefused
+from premailer import Premailer
 
 try:
     from email.mime.multipart import MIMEMultipart
@@ -30,6 +31,7 @@ from html2text import html2text as html2text_orig
 from django.contrib.sites.models import Site
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.template.loader import get_template
 from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
 from django.conf import settings
@@ -39,6 +41,7 @@ from emencia.models import ContactMailingStatus
 from emencia.utils.tokens import tokenize
 from emencia.utils.newsletter import track_links
 from emencia.utils.newsletter import body_insertion
+from emencia.utils.newsletter import fix_tinymce_links
 from emencia.settings import TRACKING_LINKS
 from emencia.settings import TRACKING_IMAGE
 from emencia.settings import TRACKING_IMAGE_FORMAT
@@ -85,7 +88,7 @@ class NewsLetterSender(object):
         self.test = test
         self.verbose = verbose
         self.newsletter = newsletter
-        self.newsletter_template = Template(self.newsletter.content)
+        # self.newsletter_template = Template(self.newsletter.content)  #kapt removed this
         self.title_template = Template(self.newsletter.title)
 
     def build_message(self, contact):
@@ -159,77 +162,51 @@ class NewsLetterSender(object):
 
     def build_email_content(self, contact):
         """Generate the mail for a contact"""
-        link_site = unsubscription = image_tracking = ''
-
+        # link_site = unsubscription = image_tracking = '' 
+        
         uidb36, token = tokenize(contact)
-
-        pre_context = {
+        domain = Site.objects.get_current().domain
+        context = Context({
             'contact': contact,
-            'domain': Site.objects.get_current().domain,
+            'domain': domain,
             'newsletter': self.newsletter,
             'tracking_image_format': TRACKING_IMAGE_FORMAT,
-            'uidb36': uidb36,
-            'token': token
-        }
+            'uidb36': uidb36, 
+            'token': token,
+        })
 
-        link_site_exist = False
-        link_site = render_to_string('newsletter/newsletter_link_site.html', Context(pre_context))
-        if '{{ link_site }}' in self.newsletter.content:
-            link_site_exist = True
-            pre_context['link_site'] = link_site
+        message_content = fix_tinymce_links(self.newsletter.content)
+        message_template = Template(message_content)
+
+        # Render only the message provided by the user with the WYSIWYG editor
+        message = message_template.render(context)
+
+        context.update({'message': message})
+
+        # link_site_exist = False
+        link_site = render_to_string('newsletter/newsletter_link_site.html', context)
+        context.update({'link_site': link_site})
 
         if INCLUDE_UNSUBSCRIPTION:
-            unsubscribtion_exist = False
-            
-            unsubscription = render_to_string(
-                'newsletter/newsletter_link_unsubscribe.html',
-                Context(pre_context)
-            )
-            
-            if '{{ unsubscription }}' in self.newsletter.content:
-                unsubscribtion_exist = True
-                pre_context['unsubscription'] = unsubscription
+            unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
+            context.update({'unsubscription': unsubscription})
 
-        context = Context(pre_context)
-        
-        content = self.newsletter_template.render(context)
+        if TRACKING_IMAGE:
+            image_tracking = render_to_string('newsletter/newsletter_image_tracking.html', context)
+            context.update({'image_tracking': image_tracking})
+
+        content_template = get_template("newsletter/%s" % self.newsletter.template)
+        content = content_template.render(context)
+
         if TRACKING_LINKS:
             content = track_links(content, context)
 
-        # --- template --- start ----------------------------------------------
-        if TRACKING_IMAGE:
-            image_tracking = render_to_string(
-                'newsletter/newsletter_image_tracking.html',
-                context
-            )
+        content = smart_unicode(content)
 
-        if USE_TEMPLATE:
-            content_context = {'content': content}
+        p = Premailer(content, base_url="http://%s" % domain, preserve_internal_links=True)
+        content = p.transform()
 
-            if not link_site_exist:
-                content_context['link_site'] = link_site
-
-            if not unsubscribtion_exist:
-                content_context['unsubscription'] = unsubscription
-            
-            content =  render_to_string(
-                'mailtemplates/{0}/{1}'.format(
-                    self.newsletter.template,
-                    'index.html'
-                ),
-                content_context
-            )
-            #insert image_tracking
-        else:
-            content = body_insertion(content, link_site)
-            if INCLUDE_UNSUBSCRIPTION:
-                content = body_insertion(content, unsubscription, end=True)
-            if TRACKING_IMAGE:
-                content = body_insertion(content, image_tracking, end=True)
-
-        # --- template --- end ------------------------------------------------
-
-        return smart_unicode(content)
+        return content
 
     def update_newsletter_status(self):
         """Update the status of the newsletter"""
@@ -288,7 +265,7 @@ class NewsLetterSender(object):
             contact.save()
         else:
             # signal error
-            print >>sys.stderr, 'smtp connection raises %s' % exception
+            print >> sys.stderr, 'smtp connection raises %s' % exception
             status = ContactMailingStatus.ERROR
 
         ContactMailingStatus.objects.create(

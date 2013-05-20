@@ -1,16 +1,22 @@
+# encoding: utf-8
+import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-
+from django.db import models
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding unique constraint on 'Newsletter', fields ['slug']
-        db.create_unique('emencia_newsletter', ['slug'])
+        
+        # Adding field 'Newsletter.template'
+        db.add_column('newsletter_newsletter', 'template', self.gf('django.db.models.fields.CharField')(default='', max_length=200), keep_default=False)
+
 
     def backwards(self, orm):
-        # Removing unique constraint on 'Newsletter', fields ['slug']
-        db.delete_unique('emencia_newsletter', ['slug'])
+        
+        # Deleting field 'Newsletter.template'
+        db.delete_column('newsletter_newsletter', 'template')
+
 
     models = {
         'auth.group': {
@@ -33,14 +39,14 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'emencia.attachment': {
+        'newsletter.attachment': {
             'Meta': {'object_name': 'Attachment'},
-            'file_attachment': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
+            'file_attachment': ('django.db.models.fields.files.FileField', [], {'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'newsletter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.Newsletter']"}),
+            'newsletter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['newsletter.Newsletter']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'emencia.contact': {
+        'newsletter.contact': {
             'Meta': {'ordering': "('creation_date',)", 'object_name': 'Contact'},
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -51,54 +57,56 @@ class Migration(SchemaMigration):
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'subscriber': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'tags': ('tagging.fields.TagField', [], {'default': "''"}),
+            'tags': ('tagging.fields.TagField', [], {}),
             'tester': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
         },
-        'emencia.contactmailingstatus': {
-            'Meta': {'ordering': "('creation_date',)", 'object_name': 'ContactMailingStatus'},
-            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.Contact']"}),
+        'newsletter.contactmailingstatus': {
+            'Meta': {'ordering': "('-creation_date',)", 'object_name': 'ContactMailingStatus'},
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['newsletter.Contact']"}),
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'link': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.Link']", 'null': 'True', 'blank': 'True'}),
-            'newsletter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.Newsletter']"}),
+            'link': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['newsletter.Link']", 'null': 'True', 'blank': 'True'}),
+            'newsletter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['newsletter.Newsletter']"}),
             'status': ('django.db.models.fields.IntegerField', [], {})
         },
-        'emencia.link': {
-            'Meta': {'ordering': "('creation_date',)", 'object_name': 'Link'},
+        'newsletter.link': {
+            'Meta': {'ordering': "('-creation_date',)", 'object_name': 'Link'},
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'url': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'emencia.mailinglist': {
-            'Meta': {'ordering': "('creation_date',)", 'object_name': 'MailingList'},
+        'newsletter.mailinglist': {
+            'Meta': {'ordering': "('-creation_date',)", 'object_name': 'MailingList'},
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'mailinglist_subscriber'", 'symmetrical': 'False', 'to': "orm['emencia.Contact']"}),
-            'unsubscribers': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'mailinglist_unsubscriber'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['emencia.Contact']"})
+            'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'mailinglist_subscriber'", 'symmetrical': 'False', 'to': "orm['newsletter.Contact']"}),
+            'unsubscribers': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'mailinglist_unsubscriber'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['newsletter.Contact']"})
         },
-        'emencia.newsletter': {
-            'Meta': {'ordering': "('creation_date',)", 'object_name': 'Newsletter'},
+        'newsletter.newsletter': {
+            'Meta': {'ordering': "('-creation_date',)", 'object_name': 'Newsletter'},
             'content': ('django.db.models.fields.TextField', [], {'default': "u'<body>\\n<!-- Edit your newsletter here -->\\n</body>'"}),
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'header_reply': ('django.db.models.fields.CharField', [], {'default': "'Emencia Newsletter<noreply@emencia.com>'", 'max_length': '255'}),
-            'header_sender': ('django.db.models.fields.CharField', [], {'default': "'Emencia Newsletter<noreply@emencia.com>'", 'max_length': '255'}),
+            'header_reply': ('django.db.models.fields.CharField', [], {'default': "'Ecoparc - Rovaltain <contact@ecoparc-rovaltain.com>'", 'max_length': '255'}),
+            'header_sender': ('django.db.models.fields.CharField', [], {'default': "'Ecoparc - Rovaltain <contact@ecoparc-rovaltain.com>'", 'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mailing_list': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.MailingList']"}),
+            'mailing_list': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['newsletter.MailingList']"}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'sending_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'server': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': "orm['emencia.SMTPServer']"}),
+            'server': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': "orm['newsletter.SMTPServer']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
             'status': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'test_contacts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['emencia.Contact']", 'null': 'True', 'blank': 'True'}),
+            'template': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+            'test_contacts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['newsletter.Contact']", 'null': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'emencia.smtpserver': {
+        'newsletter.smtpserver': {
             'Meta': {'object_name': 'SMTPServer'},
+            'emails_remains': ('django.db.models.fields.IntegerField', [], {'default': '10000'}),
             'headers': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'host': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -109,15 +117,15 @@ class Migration(SchemaMigration):
             'tls': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'user': ('django.db.models.fields.CharField', [], {'max_length': '128', 'blank': 'True'})
         },
-        'emencia.workgroup': {
+        'newsletter.workgroup': {
             'Meta': {'object_name': 'WorkGroup'},
-            'contacts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['emencia.Contact']", 'null': 'True', 'blank': 'True'}),
+            'contacts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['newsletter.Contact']", 'null': 'True', 'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.Group']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mailinglists': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['emencia.MailingList']", 'null': 'True', 'blank': 'True'}),
+            'mailinglists': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['newsletter.MailingList']", 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'newsletters': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['emencia.Newsletter']", 'null': 'True', 'blank': 'True'})
+            'newsletters': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['newsletter.Newsletter']", 'null': 'True', 'blank': 'True'})
         }
     }
 
-    complete_apps = ['emencia']
+    complete_apps = ['newsletter']

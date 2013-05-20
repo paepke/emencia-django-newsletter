@@ -37,22 +37,19 @@ class AttachmentAdminInline(admin.TabularInline):
 
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = (
-        'title', 'mailing_list', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',
-        'historic_link', 'statistics_link'
-    )
+    list_display = ('title', 'mailing_list', 'server', 'status',
+                    'sending_date', 'creation_date', 'modification_date',
+                    'historic_link', 'statistics_link')
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'content', 'header_sender', 'header_reply')
     filter_horizontal = ['test_contacts']
-    fieldsets = (
-        (None, {'fields': ['title', 'content', 'public',]}),
-        (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
-        (_('Sending'), {'fields': ('sending_date', 'status',)}),
-        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
-                )
-    if USE_TEMPLATE:
-        fieldsets[0][1]['fields'].append('template')
-
+    fieldsets = ((None, {'fields': ('title', 'template', 'content', 'public',)}),
+                 (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
+                 (_('Sending'), {'fields': ('sending_date', 'status',)}),
+                 (_('Miscellaneous'), {'fields': ('server', 'header_sender',
+                                                  'header_reply', 'slug'),
+                                       'classes': ('collapse',)}),
+                 )
     prepopulated_fields = {'slug': ('title',)}
     inlines = (AttachmentAdminInline,)
     actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'duplicate']
@@ -103,15 +100,16 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         if not newsletter.pk and not request.user.is_superuser and USE_WORKGROUPS:
             workgroups = request_workgroups(request)
 
-        if newsletter.content.startswith('http://'):
-            if CAN_USE_PREMAILER:
-                try:
-                    premailer = Premailer(newsletter.content.strip())
-                    newsletter.content = premailer.transform()
-                except PremailerError:
-                    self.message_user(request, _('Unable to download HTML, due to errors within.'))
-            else:
-                self.message_user(request, _('Please install lxml for parsing an URL.'))
+#        if newsletter.content.startswith('http://'):
+#            if CAN_USE_PREMAILER:
+#                try:
+#                    premailer = Premailer(newsletter.content.strip())
+#                    newsletter.content = premailer.transform()
+#                except PremailerError:
+#                    self.message_user(request, _('Unable to download HTML, due to errors within.'))
+#            else:
+#                self.message_user(request, _('Please install lxml for parsing an URL.'))
+
         if not request.user.has_perm('emencia.can_change_status'):
             newsletter.status = form.initial.get('status', Newsletter.DRAFT)
 

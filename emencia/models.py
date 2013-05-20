@@ -21,19 +21,13 @@ from emencia.settings import BASE_PATH
 from emencia.settings import MAILER_HARD_LIMIT
 from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import DEFAULT_HEADER_SENDER
-from emencia.utils.vcard import vcard_contact_export
-
-# --- subscriber verification --- start ---------------------------------------
+from emencia.settings import USE_TEMPLATE
 from emencia.settings import SUBSCRIBER_VERIFICATION
+from emencia.utils.vcard import vcard_contact_export
+from emencia.utils.template import get_templates
 
 if SUBSCRIBER_VERIFICATION:
     import uuid
-# --- subscriber verification --- end -----------------------------------------
-
-# --- templates --- start -----------------------------------------------------
-from emencia.settings import USE_TEMPLATE
-from emencia.utils.template import get_templates
-# --- templates --- end -------------------------------------------------------
 
 # Patch for Python < 2.6
 try:
@@ -241,6 +235,9 @@ class MailingList(models.Model):
 
 
 class MailingListSegment(models.Model):
+    """ 
+    TODO: Work out what this class/model does now
+    """
     name = models.CharField(_('name'), max_length=255)
     mailing_list = models.ForeignKey(MailingList, null=False,
                                      related_name="segments")
@@ -276,26 +273,10 @@ class Newsletter(models.Model):
     title = models.CharField(_('title'), max_length=255,
                              help_text=_('You can use the "{{ UNIQUE_KEY }}" variable ' \
                                          'for unique identifier within the newsletter\'s title.'))
+    content = models.TextField(_('content'), help_text=_('Or paste an URL.'),
+                               default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'))
 
-    # --- templates --- start -------------------------------------------------
-    if USE_TEMPLATE:
-        content = models.TextField(
-            _('content'),
-            help_text=_('Or paste an URL.'),
-            default=_('<!-- Edit your newsletter here -->')
-        )
-        template = models.CharField(
-            _('template'),
-            max_length=100,
-            choices=get_templates(),
-        )
-    else:
-        content = models.TextField(
-            _('content'),
-            help_text=_('Or paste an URL.'),
-            default=_('<body>\n<!-- Edit your newsletter here -->\n</body>')
-        )
-    # --- templates --- end ---------------------------------------------------
+    template = models.CharField(verbose_name=_('template'), max_length=200, choices=get_templates())
 
     public = models.BooleanField(_('public'), default=False)
 
@@ -345,12 +326,13 @@ class Newsletter(models.Model):
     def __unicode__(self):
         return self.title
 
-    def save(self, *args, **kwargs):
-        if self.content.startswith('http://'):
-            url = self.content.strip()
-            html_page = urlopen(url).read()
-            self.content = inline_css(html_page, url)
-        super(Newsletter, self).save(*args, **kwargs)
+    # Replaced by Kapt premailer include?
+    # def save(self, *args, **kwargs):
+    #     if self.content.startswith('http://'):
+    #         url = self.content.strip()
+    #         html_page = urlopen(url).read()
+    #         self.content = inline_css(html_page, url)
+    #     super(Newsletter, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('-creation_date',)
@@ -463,8 +445,6 @@ class WorkGroup(models.Model):
         verbose_name = _('workgroup')
         verbose_name_plural = _('workgroups')
 
-# --- subscriber verification --- start ---------------------------------------
-if SUBSCRIBER_VERIFICATION:
     class SubscriberVerification(models.Model):
         link_id = models.CharField(
             _('link_id'),
@@ -475,5 +455,3 @@ if SUBSCRIBER_VERIFICATION:
 
         def __unicode__(self):
             return unicode(self.id)
-
-# --- subscriber verification --- end -----------------------------------------
