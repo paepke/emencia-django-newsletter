@@ -73,7 +73,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.staticfiles',
     'tagging',
-    'emencia.django.newsletter',
+    'emencia',
     )
 
 # --- templates --- start -----------------------------------------------------
