@@ -1,38 +1,40 @@
-"""ModelAdmin for MailingList"""
+"""
+ModelAdmin for MailingList
+"""
 from datetime import datetime
 
-from django.contrib import admin
 from django.conf.urls import url
 from django.conf.urls import patterns
-from django.utils.encoding import smart_str
+from django.contrib import admin
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.utils.encoding import smart_str
+from django.utils.translation import ugettext_lazy as _
 
 from emencia.models import Contact
 from emencia.models import MailingList
 from emencia.settings import USE_WORKGROUPS
+from emencia.utils.excel import ExcelResponse
+from emencia.utils.vcard import vcard_contacts_export_response
 from emencia.utils.workgroups import request_workgroups
 from emencia.utils.workgroups import request_workgroups_contacts_pk
 from emencia.utils.workgroups import request_workgroups_mailinglists_pk
-from emencia.utils.vcard import vcard_contacts_export_response
-from emencia.utils.excel import ExcelResponse
 
 
 class MailingListAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('creation_date', 'public', 'name', 'description',
-                    'subscribers_count', 'unsubscribers_count',
+    list_display = ('creation_date', 'public', 'name', 'description', 'subscribers_count', 'unsubscribers_count',
                     'exportation_links')
     list_editable = ('name', 'description')
     list_filter = ('creation_date', 'modification_date')
     search_fields = ('name', 'description',)
     filter_horizontal = ['subscribers', 'unsubscribers']
-    fieldsets = ((None, {'fields': ('name', 'description', 'public',)}),
-                 (None, {'fields': ('subscribers',)}),
-                 (None, {'fields': ('unsubscribers',)}),
-                 )
+    fieldsets = (
+        (None, {'fields': ('name', 'description', 'public',)}),
+        (None, {'fields': ('subscribers',)}),
+        (None, {'fields': ('unsubscribers',)}),
+    )
     actions = ['merge_mailinglist']
     actions_on_top = False
     actions_on_bottom = True
@@ -124,11 +126,6 @@ class MailingListAdmin(admin.ModelAdmin):
         )
         return my_urls + urls
 
-# --- subscriber verification --- start ---------------------------------------
-from emencia.models import SubscriberVerification
 
 class SubscriberVerificationAdmin(admin.ModelAdmin):
     fields = ['link_id', 'contact']
-
-admin.site.register(SubscriberVerification, SubscriberVerificationAdmin)
-# --- subscriber verification --- end -----------------------------------------

@@ -1,27 +1,28 @@
-"""ModelAdmin for Contact"""
+"""
+ModelAdmin for Contact
+"""
 import StringIO
-from django.conf import settings
 from datetime import datetime
-
-from django.contrib import admin
-from django.dispatch import Signal
+from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls import patterns
 from django.core.urlresolvers import reverse
+from django.contrib import admin
+from django.contrib.admin.views.main import ChangeList
+from django.db import DatabaseError
+from django.dispatch import Signal
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
-from django.http import HttpResponseRedirect
-from django.contrib.admin.views.main import ChangeList
-from django.db import DatabaseError
 
 from emencia.models import MailingList
 from emencia.settings import USE_WORKGROUPS
-from emencia.utils.importation import import_dispatcher
+from emencia.utils.excel import ExcelResponse
+from emencia.utils.importing import import_dispatcher
+from emencia.utils.vcard import vcard_contacts_export_response
 from emencia.utils.workgroups import request_workgroups
 from emencia.utils.workgroups import request_workgroups_contacts_pk
-from emencia.utils.vcard import vcard_contacts_export_response
-from emencia.utils.excel import ExcelResponse
 
 
 contacts_imported = Signal(providing_args=['source', 'type'])
@@ -29,16 +30,18 @@ contacts_imported = Signal(providing_args=['source', 'type'])
 
 class ContactAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('verified', 'email', 'first_name', 'last_name', 'tags', 'tester', 'subscriber',
-                    'valid', 'total_subscriptions', 'creation_date', 'related_object_admin')
+    list_display = (
+        'verified', 'email', 'first_name', 'last_name', 'tags', 'tester', 'subscriber', 'valid', 'total_subscriptions',
+        'creation_date', 'related_object_admin'
+    )
     list_filter = ('subscriber', 'valid', 'tester', 'creation_date', 'modification_date')
     search_fields = ('email', 'first_name', 'last_name', 'tags')
-    fieldsets = ((None, {'fields': ('email', 'first_name', 'last_name')}),
-                 (None, {'fields': ('tags',)}),
-                 (_('Status'), {'fields': ('verified', 'subscriber', 'valid', 'tester')}),
-                 (_('Advanced'), {'fields': ('object_id', 'content_type'),
-                                  'classes': ('collapse',)}),
-                 )
+    fieldsets = (
+        (None, {'fields': ('email', 'first_name', 'last_name')}),
+        (None, {'fields': ('tags',)}),
+        (_('Status'), {'fields': ('verified', 'subscriber', 'valid', 'tester')}),
+        (_('Advanced'), {'fields': ('object_id', 'content_type'), 'classes': ('collapse',)}),
+    )
     actions = ['create_mailinglist', 'export_vcard', 'export_excel']
     actions_on_top = False
     actions_on_bottom = True
@@ -61,12 +64,15 @@ class ContactAdmin(admin.ModelAdmin):
     def related_object_admin(self, contact):
         """Display link to related object's admin"""
         if contact.content_type and contact.object_id:
-            admin_url = reverse('admin:%s_%s_change' % (contact.content_type.app_label,
-                                                        contact.content_type.model),
-                                args=(contact.object_id,))
-            return '%s: <a href="%s">%s</a>' % (contact.content_type.model.capitalize(),
-                                                admin_url,
-                                                contact.content_object.__unicode__())
+            admin_url = reverse(
+                'admin:%s_%s_change' % (contact.content_type.app_label, contact.content_type.model),
+                args=(contact.object_id,)
+            )
+            return '%s: <a href="%s">%s</a>' % (
+                contact.content_type.model.capitalize(),
+                admin_url,
+                contact.content_object.__unicode__()
+            )
         return _('No relative object')
     related_object_admin.allow_tags = True
     related_object_admin.short_description = _('Related object')
@@ -93,14 +99,18 @@ class ContactAdmin(admin.ModelAdmin):
     def create_mailinglist(self, request, queryset):
         """Create a mailing list from selected contact"""
         when = str(datetime.now()).split('.')[0]
-        new_mailing = MailingList(name=_('New mailinglist at %s') % when,
-                                  description=_('New mailing list created in admin at %s') % when)
+        new_mailing = MailingList(
+            name=_('New mailinglist at %s') % when,
+            description=_('New mailing list created in admin at %s') % when
+        )
         new_mailing.save()
 
         if 'lite' in settings.DATABASES['default']['ENGINE']:
-            self.message_user(request, _('SQLite3 or a SpatialLite database type detected, '
-                                         'please note you will be limited to 999 contacts '
-                                         'per mailing list.'))
+            self.message_user(
+                request,
+                _('SQLite3 or a SpatialLite database type detected, please note you will be limited to 999 contacts '
+                    'per mailing list.')
+            )
         try:
             new_mailing.subscribers = queryset.all()
         except DatabaseError:
@@ -121,17 +131,14 @@ class ContactAdmin(admin.ModelAdmin):
         opts = self.model._meta
 
         if request.POST:
-            source = request.FILES.get('source') or \
-                     StringIO.StringIO(request.POST.get('source', ''))
+            source = request.FILES.get('source') or StringIO.StringIO(request.POST.get('source', ''))
             if not request.user.is_superuser and USE_WORKGROUPS:
                 workgroups = request_workgroups(request)
             else:
                 workgroups = []
-            inserted = import_dispatcher(source, request.POST['type'],
-                                         workgroups, None)
+            inserted = import_dispatcher(source, request.POST['type'], workgroups, None)
             if inserted:
-                contacts_imported.send(sender=self, source=source,
-                                       type=request.POST['type'])
+                contacts_imported.send(sender=self, source=source, type=request.POST['type'])
 
             self.message_user(
                 request, _('%s contacts succesfully imported.') % inserted
@@ -143,24 +150,20 @@ class ContactAdmin(admin.ModelAdmin):
                    'root_path': reverse('admin:index'),
                    'app_label': opts.app_label}
 
-        return render_to_response('newsletter/contact_import.html',
-                                  context, RequestContext(request))
+        return render_to_response('newsletter/contact_import.html', context, RequestContext(request))
 
     def filtered_request_queryset(self, request):
         """Return queryset filtered by the admin list view"""
         list_display = self.get_list_display(request)
         list_display_links = self.get_list_display_links(request, list_display)
-        cl = ChangeList(request, self.model, list_display,
-                        list_display_links, self.list_filter,
-                        self.date_hierarchy, self.search_fields,
-                        self.list_select_related, self.list_per_page,
+        cl = ChangeList(request, self.model, list_display, list_display_links, self.list_filter,
+                        self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page,
                         self.list_editable, self.list_max_show_all, self)
         return cl.get_query_set(request)
 
     def creation_mailinglist(self, request):
         """Create a mailing list form the filtered contacts"""
-        return self.create_mailinglist(request,
-                                       self.filtered_request_queryset(request))
+        return self.create_mailinglist(request, self.filtered_request_queryset(request))
 
     def exportation_vcard(self, request):
         """Export filtered contacts in VCard"""

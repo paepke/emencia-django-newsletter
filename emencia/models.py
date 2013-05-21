@@ -449,13 +449,14 @@ class WorkGroup(models.Model):
         verbose_name = _('workgroup')
         verbose_name_plural = _('workgroups')
 
-    class SubscriberVerification(models.Model):
-        link_id = models.CharField(
-            _('link_id'),
-            max_length=255,
-            default=uuid.uuid4
-        )
-        contact = models.ForeignKey(Contact)
 
-        def __unicode__(self):
-            return unicode(self.id)
+class SubscriberVerification(models.Model):
+    link_id = models.CharField(
+        _('link_id'),
+        max_length=255,
+        default=uuid.uuid4
+    )
+    contact = models.ForeignKey(Contact)
+
+    def __unicode__(self):
+        return unicode(self.id)
