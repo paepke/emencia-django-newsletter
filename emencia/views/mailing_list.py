@@ -14,7 +14,9 @@ from emencia.models import ContactMailingStatus
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
-from emencia.models import SMTPServer, SubscriberVerification
+from emencia.models import SMTPServer
+from emencia.models import SubscriberVerification
+from emencia.settings import UNSUBSCRIBE_ALL
 
 from django.utils import translation
 
@@ -38,10 +40,12 @@ from html2text import html2text as html2text_orig
 
 
 def view_mailinglist_unsubscribe(request, slug, uidb36, token):
-    """Unsubscribe a contact to one or all mailing lists"""
+    """
+    Unsubscribe a contact to one or all mailing lists
+    """
     newsletter = get_object_or_404(Newsletter, slug=slug)
     contact = untokenize(uidb36, token)
-    if emencia_settings.UNSUBSCRIBE_ALL:
+    if UNSUBSCRIBE_ALL:
         mailing_lists = MailingList.objects.all()
         contact.subscriber = False
         contact.save()
@@ -62,13 +66,17 @@ def view_mailinglist_unsubscribe(request, slug, uidb36, token):
 
     if unsubscribed > 0:
         already_unsubscribed = True
-        ContactMailingStatus.objects.create(newsletter=newsletter, contact=contact,
-                                            status=ContactMailingStatus.UNSUBSCRIPTION)
+        ContactMailingStatus.objects.create(
+            newsletter=newsletter,
+            contact=contact,
+            status=ContactMailingStatus.UNSUBSCRIPTION
+        )
 
-    return render_to_response('newsletter/mailing_list_unsubscribe.html',
-                              {'email': contact.email,'unsubscribed_count':unsubscribed,
-                               'already_unsubscribed': already_unsubscribed},
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'newsletter/mailing_list_unsubscribe.html',
+        {'email': contact.email, 'unsubscribed_count':unsubscribed, 'already_unsubscribed': already_unsubscribed},
+        context_instance=RequestContext(request)
+    )
 
 
 def view_mailinglist_subscribe(request, form_class, mailing_list_id=None, link_id=None):

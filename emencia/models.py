@@ -1,4 +1,7 @@
-"""Models for emencia"""
+"""
+Models for emencia
+"""
+import uuid
 from smtplib import SMTP, SMTP_SSL
 from smtplib import SMTPHeloError
 from datetime import datetime
@@ -21,13 +24,9 @@ from emencia.settings import BASE_PATH
 from emencia.settings import MAILER_HARD_LIMIT
 from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import DEFAULT_HEADER_SENDER
-from emencia.settings import USE_TEMPLATE
-from emencia.settings import SUBSCRIBER_VERIFICATION
 from emencia.utils.vcard import vcard_contact_export
 from emencia.utils.template import get_templates
 
-if SUBSCRIBER_VERIFICATION:
-    import uuid
 
 # Patch for Python < 2.6
 try:
@@ -43,27 +42,44 @@ except AttributeError:
 
 
 class SMTPServer(models.Model):
-    """Configuration of a SMTP server"""
+    """
+    Configuration of a SMTP server
+    """
     name = models.CharField(_('name'), max_length=255)
     host = models.CharField(_('server host'), max_length=255)
     user = models.CharField(
-        _('server user'), max_length=128, blank=True,
+        _('server user'),
+        max_length=128,
+        blank=True,
         help_text=_('Leave empty if the host is public.')
     )
     password = models.CharField(
-        _('server password'), max_length=128, blank=True,
+        _('server password'),
+        max_length=128,
+        blank=True,
         help_text=_('Leave empty if the host is public.')
     )
     port = models.IntegerField(_('server port'), default=25)
     tls = models.BooleanField(_('server use TLS'))
 
-    headers = models.TextField(_('custom headers'), blank=True,
-                               help_text=_('key1: value1 key2: value2, splitted by return line.\n'\
-                                           'Useful for passing some tracking headers if your provider allows it.'))
-    mails_hour = models.IntegerField(_('e-mail send rate'), help_text=_("E-Mail sending rate in messages per hour"),
-                                     default=0)
-    emails_remains = models.IntegerField(_('remaining e-mail'), help_text=_("Sendable E-Mail in the current account"),
-                                         default=MAILER_HARD_LIMIT)
+    headers = models.TextField(
+        _('custom headers'),
+        blank=True,
+        help_text=_(
+            'key1: value1 key2: value2, split by return line.\n'\
+            'Useful for passing some tracking headers if your provider allows it.'
+        )
+    )
+    mails_hour = models.IntegerField(
+        _('e-mail send rate'),
+        help_text=_("E-Mail sending rate in messages per hour"),
+        default=0
+    )
+    emails_remains = models.IntegerField(
+        _('remaining e-mail'),
+        help_text=_("Sendable E-Mail in the current account"),
+        default=MAILER_HARD_LIMIT
+    )
 
     def connect(self):
         """Connect the SMTP Server"""
@@ -281,23 +297,16 @@ class Newsletter(models.Model):
     public = models.BooleanField(_('public'), default=False)
 
     mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
-    test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'),
-                                           blank=True, null=True)
+    test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
 
-    server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'),
-                               default=1)
-    header_sender = models.CharField(_('sender'), max_length=255,
-                                     default=DEFAULT_HEADER_SENDER)
-    header_reply = models.CharField(_('reply to'), max_length=255,
-                                    default=DEFAULT_HEADER_REPLY)
+    server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
+    header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
+    header_reply = models.CharField(_('reply to'), max_length=255, default=DEFAULT_HEADER_REPLY)
 
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
     sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
 
-    slug = models.SlugField(
-        help_text=_('Used for displaying the newsletter on the site.'),
-        unique=True
-    )
+    slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'), unique=True)
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
 
@@ -424,19 +433,14 @@ class ContactMailingStatus(models.Model):
 
 
 class WorkGroup(models.Model):
-    """Work Group for privatization of the ressources"""
+    """
+    Work Group for privatization of the resources
+    """
     name = models.CharField(_('name'), max_length=255)
     group = models.ForeignKey(Group, verbose_name=_('permissions group'))
-    contacts = models.ManyToManyField(
-        Contact, verbose_name=_('contacts'), blank=True, null=True
-    )
-    mailinglists = models.ManyToManyField(
-        MailingList, verbose_name=_('mailing lists'), blank=True, null=True
-    )
-    newsletters = models.ManyToManyField(
-        Newsletter, verbose_name=_('newsletters'), blank=True, null=True
-    )
-
+    contacts = models.ManyToManyField(Contact, verbose_name=_('contacts'), blank=True, null=True)
+    mailinglists = models.ManyToManyField(MailingList, verbose_name=_('mailing lists'), blank=True, null=True)
+    newsletters = models.ManyToManyField(Newsletter, verbose_name=_('newsletters'), blank=True, null=True)
 
     def __unicode__(self):
         return self.name

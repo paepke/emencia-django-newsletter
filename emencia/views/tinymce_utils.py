@@ -1,18 +1,20 @@
 # views.py
 from django.http import HttpResponse
 from django.conf import settings
-from emencia import settings as e_settings
+from emencia.settings import NEWSLETTER_TINYMCE_TEMPLATE_DIR
 from filebrowser.base import FileObject
 
 import os
 
 def view_tinymce_templates(request):
-    full_path = os.path.join(settings.MEDIA_ROOT,
-                             e_settings.NEWSLETTER_TINYMCE_TEMPLATE_DIR)
+    full_path = os.path.join(
+        settings.MEDIA_ROOT,
+        NEWSLETTER_TINYMCE_TEMPLATE_DIR
+    )
     tmpl_dir = os.listdir(full_path)
     templates = []
     for tmpl in tmpl_dir:
-        fileobject = FileObject(os.path.join(e_settings.NEWSLETTER_TINYMCE_TEMPLATE_DIR,tmpl))
+        fileobject = FileObject(os.path.join(NEWSLETTER_TINYMCE_TEMPLATE_DIR, tmpl))
         templates.append('["%s", "%s"]' % (fileobject.filename, fileobject._url_full()))
     
     page = """

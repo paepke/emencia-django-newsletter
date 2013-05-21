@@ -17,7 +17,7 @@ from emencia.utils.newsletter import track_links
 from emencia.utils.tokens import untokenize
 from emencia.settings import TRACKING_LINKS
 from emencia.settings import INCLUDE_UNSUBSCRIPTION
-# from emencia.settings import USE_TEMPLATE
+
 
 def render_newsletter(request, slug, context):
     """Return a newsletter in HTML format"""

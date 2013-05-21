@@ -11,7 +11,6 @@ from datetime import datetime
 from datetime import timedelta
 from smtplib import SMTPRecipientsRefused
 from premailer import Premailer
-
 try:
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -48,11 +47,8 @@ from emencia.settings import TRACKING_IMAGE_FORMAT
 from emencia.settings import UNIQUE_KEY_LENGTH
 from emencia.settings import UNIQUE_KEY_CHAR_SET
 from emencia.settings import INCLUDE_UNSUBSCRIPTION
-from emencia.settings import INCLUDE_SITE_LINKS
 from emencia.settings import SLEEP_BETWEEN_SENDING
 from emencia.settings import RESTART_CONNECTION_BETWEEN_SENDING
-from emencia.settings import SUBSCRIBER_VERIFICATION
-from emencia.settings import USE_TEMPLATE
 
 if not hasattr(timedelta, 'total_seconds'):
     def total_seconds(td):
@@ -146,17 +142,14 @@ class NewsLetterSender(object):
                 message_attachment.set_payload(fd.read())
                 encode_base64(message_attachment)
             fd.close()
-            message_attachment.add_header('Content-Disposition', 'attachment',
-                                          filename=attachment.title)
+            message_attachment.add_header('Content-Disposition', 'attachment', filename=attachment.title)
             attachments.append(message_attachment)
 
         return attachments
 
     def build_title_content(self, contact):
         """Generate the email title for a contact"""
-        context = Context({'contact': contact,
-                           'UNIQUE_KEY': ''.join(sample(UNIQUE_KEY_CHAR_SET,
-                                                        UNIQUE_KEY_LENGTH))})
+        context = Context({'contact': contact, 'UNIQUE_KEY': ''.join(sample(UNIQUE_KEY_CHAR_SET, UNIQUE_KEY_LENGTH))})
         title = self.title_template.render(context)
         return title
 
@@ -297,10 +290,9 @@ class Mailer(NewsLetterSender):
 
         i = 1
         for contact in expedition_list:
-            if SUBSCRIBER_VERIFICATION:
-                if not contact.verified:
-                    print '- No verified email: {0}'.format(contact.email)
-                    continue
+            if not contact.verified:
+                print '- No verified email: {0}'.format(contact.email)
+                continue
             
             if self.verbose:
                 print '- Processing %s/%s (%s)' % (

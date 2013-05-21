@@ -16,7 +16,6 @@ from emencia.mailer import Mailer
 from emencia.settings import USE_TINYMCE, USE_CKEDITOR
 from emencia.settings import USE_WORKGROUPS
 from emencia.settings import TINYMCE_WIDGET_ATTRS
-from emencia.settings import USE_TEMPLATE
 try:
     CAN_USE_PREMAILER = True
     from emencia.utils.premailer import Premailer
