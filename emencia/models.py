@@ -2,19 +2,18 @@
 Models for emencia
 """
 import uuid
-from smtplib import SMTP, SMTP_SSL
-from smtplib import SMTPHeloError
+
 from datetime import datetime
 from datetime import timedelta
-from inlinestyler.utils import inline_css
-from urllib2 import urlopen
 
-from django.db import models
-from django.utils.encoding import smart_str
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
+from django.db import models
 from django.utils.encoding import force_unicode
+from django.utils.encoding import smart_str
+from django.utils.translation import ugettext_lazy as _
 
 from emencia.managers import ContactManager
 from emencia.settings import BASE_PATH
@@ -23,8 +22,11 @@ from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import DEFAULT_HEADER_SENDER
 from emencia.utils.vcard import vcard_contact_export
 
-# --- subscriber verification --- start ---------------------------------------
-from emencia.settings import SUBSCRIBER_VERIFICATION
+from smtplib import SMTP
+from smtplib import SMTP_SSL
+from smtplib import SMTPHeloError
+
+from tagging.fields import TagField
 
 # Patch for Python < 2.6
 try:
@@ -98,8 +100,8 @@ class SMTPServer(models.Model):
         return smtp
 
     def delay(self):
-        """compute the delay (in seconds) between mails to ensure mails
-        per hour limit is not reached
+        """
+        compute the delay (in seconds) between mails to ensure mails per hour limit is not reached
 
         :rtype: float
         """
@@ -178,7 +180,8 @@ class Contact(models.Model):
     def mail_format(self):
         if self.first_name and self.last_name:
             # return '%s %s <%s>' % (self.first_name, self.last_name, self.email)
-            # Applying cdchen's fix - https://github.com/cdchen/emencia-django-newsletter/commit/bd98653d92a442be2fdd044c6d8c59ab00a5bc7d
+            # Applying cdchen's fix -
+            # https://github.com/cdchen/emencia-django-newsletter/commit/bd98653d92a442be2fdd044c6d8c59ab00a5bc7d
             return '"%s %s" <%s>' % (
                 unicode(self.last_name).encode('utf-8'),
                 unicode(self.first_name).encode('utf-8'),
@@ -237,8 +240,7 @@ class MailingList(models.Model):
 
     def expedition_set(self):
         unsubscribers_id = self.unsubscribers.values_list('id', flat=True)
-        return self.subscribers.valid_subscribers().exclude(
-            id__in=unsubscribers_id)
+        return self.subscribers.valid_subscribers().exclude(id__in=unsubscribers_id)
 
     def __unicode__(self):
         return self.name
@@ -251,11 +253,9 @@ class MailingList(models.Model):
 
 class MailingListSegment(models.Model):
     name = models.CharField(_('name'), max_length=255)
-    mailing_list = models.ForeignKey(MailingList, null=False,
-                                     related_name="segments")
+    mailing_list = models.ForeignKey(MailingList, null=False, related_name="segments")
     position = models.IntegerField(default=1)
-    subscribers = models.ManyToManyField(Contact,
-                                         verbose_name=_('subscribers'))
+    subscribers = models.ManyToManyField(Contact, verbose_name=_('subscribers'))
 
     def __unicode__(self):
         return self.name
@@ -275,16 +275,22 @@ class Newsletter(models.Model):
     SENT = 4
     CANCELED = 5
 
-    STATUS_CHOICES = ((DRAFT, _('draft')),
-                      (WAITING, _('waiting sending')),
-                      (SENDING, _('sending')),
-                      (SENT, _('sent')),
-                      (CANCELED, _('canceled')),
-                      )
+    STATUS_CHOICES = (
+        (DRAFT, _('draft')),
+        (WAITING, _('waiting sending')),
+        (SENDING, _('sending')),
+        (SENT, _('sent')),
+        (CANCELED, _('canceled')),
+    )
 
-    title = models.CharField(_('title'), max_length=255,
-                             help_text=_('You can use the "{{ UNIQUE_KEY }}" variable ' \
-                                         'for unique identifier within the newsletter\'s title.'))
+    title = models.CharField(
+        _('title'),
+        max_length=255,
+        help_text=_('You can use the "{{ UNIQUE_KEY }}" variable for unique identifier within the newsletter\'s title.')
+    )
+    content = models.TextField(
+        _('content'), help_text=_('Or paste an URL.'), default=_('<!-- Edit your newsletter here -->')
+    )
 
     template = models.CharField(verbose_name=_('template'), max_length=200, choices=TEMPLATES, default=TEMPLATES[0][0])
 
@@ -332,13 +338,6 @@ class Newsletter(models.Model):
     def __unicode__(self):
         return self.title
 
-    def save(self, *args, **kwargs):
-        if self.content.startswith('http://'):
-            url = self.content.strip()
-            html_page = urlopen(url).read()
-            self.content = inline_css(html_page, url)
-        super(Newsletter, self).save(*args, **kwargs)
-
     class Meta:
         ordering = ('-creation_date',)
         verbose_name = _('newsletter')
@@ -374,8 +373,7 @@ class Attachment(models.Model):
 
     newsletter = models.ForeignKey(Newsletter, verbose_name=_('newsletter'))
     title = models.CharField(_('title'), max_length=255)
-    file_attachment = models.FileField(_('file to attach'), max_length=255,
-                                       upload_to=get_newsletter_storage_path)
+    file_attachment = models.FileField(_('file to attach'), max_length=255, upload_to=get_newsletter_storage_path)
 
     class Meta:
         verbose_name = _('attachment')
@@ -399,28 +397,26 @@ class ContactMailingStatus(models.Model):
     LINK_OPENED = 6
     UNSUBSCRIPTION = 7
 
-    STATUS_CHOICES = ((SENT_TEST, _('sent in test')),
-                      (SENT, _('sent')),
-                      (ERROR, _('error')),
-                      (INVALID, _('invalid email')),
-                      (OPENED, _('opened')),
-                      (OPENED_ON_SITE, _('opened on site')),
-                      (LINK_OPENED, _('link opened')),
-                      (UNSUBSCRIPTION, _('unsubscription')),
-                      )
+    STATUS_CHOICES = (
+        (SENT_TEST, _('sent in test')),
+        (SENT, _('sent')),
+        (ERROR, _('error')),
+        (INVALID, _('invalid email')),
+        (OPENED, _('opened')),
+        (OPENED_ON_SITE, _('opened on site')),
+        (LINK_OPENED, _('link opened')),
+        (UNSUBSCRIPTION, _('unsubscription')),
+    )
 
     newsletter = models.ForeignKey(Newsletter, verbose_name=_('newsletter'))
     contact = models.ForeignKey(Contact, verbose_name=_('contact'))
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES)
-    link = models.ForeignKey(Link, verbose_name=_('link'),
-                             blank=True, null=True)
+    link = models.ForeignKey(Link, verbose_name=_('link'), blank=True, null=True)
 
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
 
     def __unicode__(self):
-        return '%s : %s : %s' % (self.newsletter.__unicode__(),
-                                 self.contact.__unicode__(),
-                                 self.get_status_display())
+        return '%s : %s : %s' % (self.newsletter.__unicode__(), self.contact.__unicode__(), self.get_status_display())
 
     class Meta:
         ordering = ('-creation_date',)
@@ -446,11 +442,7 @@ class WorkGroup(models.Model):
         verbose_name_plural = _('workgroups')
 
 class SubscriberVerification(models.Model):
-    link_id = models.CharField(
-        _('link_id'),
-        max_length=255,
-        default=uuid.uuid4
-    )
+    link_id = models.CharField( _('link_id'), max_length=255, default=uuid.uuid4)
     contact = models.ForeignKey(Contact)
 
     def __unicode__(self):

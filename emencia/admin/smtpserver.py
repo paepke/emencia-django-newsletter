@@ -8,10 +8,10 @@ from emencia.models import SMTPServer
 
 
 class SMTPServerAdminForm(forms.ModelForm):
-    """Form ofr SMTPServer with custom validation"""
+    """Form for SMTPServer with custom validation"""
 
     def clean_headers(self):
-        """Check if the headers are well formated"""
+        """Check if the headers are well formatted"""
         for line in self.cleaned_data['headers'].splitlines():
             elems = line.split(':')
             if len(elems) < 2:
@@ -30,12 +30,11 @@ class SMTPServerAdmin(admin.ModelAdmin):
     list_display = ('name', 'host', 'port', 'user', 'tls', 'mails_hour',)
     list_filter = ('tls',)
     search_fields = ('name', 'host', 'user')
-    fieldsets = ((None, {'fields': ('name', )}),
-                 (_('Configuration'), {'fields': ('host', 'port',
-                                                  'user', 'password', 'tls')}),
-                 (_('Miscellaneous'), {'fields': ('mails_hour', 'emails_remains','headers'),
-                                       'classes': ('collapse', )}),
-                 )
+    fieldsets = (
+        (None, {'fields': ('name', )}),
+        (_('Configuration'), {'fields': ('host', 'port', 'user', 'password', 'tls')}),
+        (_('Miscellaneous'), {'fields': ('mails_hour', 'emails_remains','headers'), 'classes': ('collapse', )}),
+    )
     actions = ['check_connections']
     actions_on_top = False
     actions_on_bottom = True

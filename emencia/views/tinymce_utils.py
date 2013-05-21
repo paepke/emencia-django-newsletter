@@ -1,16 +1,19 @@
 # views.py
-from django.http import HttpResponse
-from django.conf import settings
-from emencia.settings import NEWSLETTER_TINYMCE_TEMPLATE_DIR
-from filebrowser.base import FileObject
-
 import os
 
+from django.conf import settings
+from django.http import HttpResponse
+
+from emencia.settings import NEWSLETTER_TINYMCE_TEMPLATE_DIR
+
+try:
+    from filebrowser.base import FileObject
+except ImportError:
+    pass
+
+
 def view_tinymce_templates(request):
-    full_path = os.path.join(
-        settings.MEDIA_ROOT,
-        NEWSLETTER_TINYMCE_TEMPLATE_DIR
-    )
+    full_path = os.path.join(settings.MEDIA_ROOT, NEWSLETTER_TINYMCE_TEMPLATE_DIR)
     tmpl_dir = os.listdir(full_path)
     templates = []
     for tmpl in tmpl_dir:

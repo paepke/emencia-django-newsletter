@@ -2,16 +2,15 @@
 # Based on http://www.djangosnippets.org/snippets/1151/
 import datetime
 
-from django.http import HttpResponse
 from django.db.models.query import QuerySet
 from django.db.models.query import ValuesQuerySet
+from django.http import HttpResponse
 
 
 class ExcelResponse(HttpResponse):
     """ExcelResponse feeded by queryset"""
 
-    def __init__(self, data, output_name='excel_data', headers=None,
-                 force_csv=False, encoding='utf8'):
+    def __init__(self, data, output_name='excel_data', headers=None, force_csv=False, encoding='utf8'):
         valid_data = False
         if isinstance(data, ValuesQuerySet):
             data = list(data)
@@ -41,10 +40,12 @@ class ExcelResponse(HttpResponse):
         if use_xls:
             book = xlwt.Workbook(encoding=encoding)
             sheet = book.add_sheet('Sheet 1')
-            styles = {'datetime': xlwt.easyxf(num_format_str='yyyy-mm-dd hh:mm:ss'),
-                      'date': xlwt.easyxf(num_format_str='yyyy-mm-dd'),
-                      'time': xlwt.easyxf(num_format_str='hh:mm:ss'),
-                      'default': xlwt.Style.default_style}
+            styles = {
+                'datetime': xlwt.easyxf(num_format_str='yyyy-mm-dd hh:mm:ss'),
+                'date': xlwt.easyxf(num_format_str='yyyy-mm-dd'),
+                'time': xlwt.easyxf(num_format_str='hh:mm:ss'),
+                'default': xlwt.Style.default_style
+            }
             for rowx, row in enumerate(data):
                 for colx, value in enumerate(row):
                     if isinstance(value, datetime.datetime):
@@ -74,5 +75,4 @@ class ExcelResponse(HttpResponse):
         output.seek(0)
         super(ExcelResponse, self).__init__(content=output.getvalue(),
                                             mimetype=mimetype)
-        self['Content-Disposition'] = 'attachment;filename="%s.%s"' % \
-            (output_name.replace('"', '\"'), file_ext)
+        self['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)

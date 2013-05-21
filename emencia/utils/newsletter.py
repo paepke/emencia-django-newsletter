@@ -1,7 +1,8 @@
 """Utils for newsletter"""
 import re
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
+
 from django.core.urlresolvers import reverse
 
 from emencia.models import Link
@@ -53,7 +54,13 @@ def track_links(content, context):
             if link_href.startswith("http"):
                 link_title = link_markup.get('title', link_href)
                 link, created = Link.objects.get_or_create(url=link_href, defaults={'title': link_title})
-                link_markup['href'] = 'http://%s%s' % (context['domain'], reverse('newsletter_newsletter_tracking_link', args=[context['newsletter'].slug, context['uidb36'], context['token'], link.pk]))
+                link_markup['href'] = 'http://%s%s' % (
+                    context['domain'], 
+                    reverse(
+                        'newsletter_newsletter_tracking_link', 
+                        args=[context['newsletter'].slug, context['uidb36'], context['token'], link.pk]
+                    )
+                )
 
     if USE_PRETTIFY:
         return soup.prettify()

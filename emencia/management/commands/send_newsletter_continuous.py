@@ -1,12 +1,13 @@
 """Command for sending the newsletter"""
-from threading import Thread
 import signal
 import sys
 
+from threading import Thread
+
 from django.conf import settings
-from django.utils.translation import activate
 from django.core import signals
 from django.core.management.base import NoArgsCommand
+from django.utils.translation import activate
 
 from emencia.mailer import SMTPMailer
 from emencia.models import SMTPServer
