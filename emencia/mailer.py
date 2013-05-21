@@ -1,32 +1,14 @@
 """Mailer for emencia"""
+import mimetypes
 import os
 import re
 import sys
-import time
 import threading
-import mimetypes
-from random import sample
-from StringIO import StringIO
+import time
+
 from datetime import datetime
 from datetime import timedelta
-from smtplib import SMTPRecipientsRefused
-from premailer import Premailer
-try:
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.mime.Encoders import encode_base64
-    from email.mime.MIMEAudio import MIMEAudio
-    from email.mime.MIMEBase import MIMEBase
-    from email.mime.MIMEImage import MIMEImage
-except ImportError:  # Python 2.4 compatibility
-    from email.MIMEMultipart import MIMEMultipart
-    from email.MIMEText import MIMEText
-    from email.Encoders import encode_base64
-    from email.MIMEAudio import MIMEAudio
-    from email.MIMEBase import MIMEBase
-    from email.MIMEImage import MIMEImage
-from email import message_from_file
-from html2text import html2text as html2text_orig
+
 from django.contrib.sites.models import Site
 from django.template import Context, Template
 from django.template.loader import render_to_string
@@ -35,37 +17,53 @@ from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
 from django.conf import settings
 
+from email import message_from_file
+from email.encoders import encode_base64
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 from emencia.models import Newsletter
 from emencia.models import ContactMailingStatus
-from emencia.utils.tokens import tokenize
-from emencia.utils.newsletter import track_links
-from emencia.utils.newsletter import body_insertion
-from emencia.utils.newsletter import fix_tinymce_links
+from emencia.settings import INCLUDE_UNSUBSCRIPTION
+from emencia.settings import RESTART_CONNECTION_BETWEEN_SENDING
+from emencia.settings import SLEEP_BETWEEN_SENDING
 from emencia.settings import TRACKING_LINKS
 from emencia.settings import TRACKING_IMAGE
 from emencia.settings import TRACKING_IMAGE_FORMAT
 from emencia.settings import UNIQUE_KEY_LENGTH
 from emencia.settings import UNIQUE_KEY_CHAR_SET
-from emencia.settings import INCLUDE_UNSUBSCRIPTION
-from emencia.settings import SLEEP_BETWEEN_SENDING
-from emencia.settings import RESTART_CONNECTION_BETWEEN_SENDING
+from emencia.utils.tokens import tokenize
+from emencia.utils.newsletter import track_links
+from emencia.utils.newsletter import body_insertion
+from emencia.utils.newsletter import fix_tinymce_links
+
+from html2text import html2text as html2text_orig
+
+from premailer import Premailer
+
+from random import sample
+
+from smtplib import SMTPRecipientsRefused
+
+from StringIO import StringIO
 
 if not hasattr(timedelta, 'total_seconds'):
     def total_seconds(td):
-        return ((td.microseconds +
-                 (td.seconds + td.days * 24 * 3600) * 1000000) /
-                1000000.0)
+        return ((td.microseconds + (td.seconds + td.days * 24 * 3600) * 1000000) / 1000000.0)
 else:
     total_seconds = lambda td: td.total_seconds()
-
 
 LINK_RE = re.compile(r"https?://([^ \n]+\n)+[^ \n]+", re.MULTILINE)
 
 
 def html2text(html):
-    """Use html2text but repair newlines cutting urls.
-    Need to use this hack until
-    https://github.com/aaronsw/html2text/issues/#issue/7 is not fixed"""
+    """
+    Use html2text but repair newlines cutting urls.
+    Need to use this hack until https://github.com/aaronsw/html2text/issues/#issue/7 is not fixed
+    """
     txt = html2text_orig(html)
     links = list(LINK_RE.finditer(txt))
     out = StringIO()
@@ -79,7 +77,6 @@ def html2text(html):
 
 
 class NewsLetterSender(object):
-
     def __init__(self, newsletter, test=False, verbose=0):
         self.test = test
         self.verbose = verbose
@@ -89,8 +86,7 @@ class NewsLetterSender(object):
 
     def build_message(self, contact):
         """
-        Build the email as a multipart message containing
-        a multipart alternative for text (plain, HTML) plus
+        Build the email as a multipart message containing a multipart alternative for text (plain, HTML) plus
         all the attached files.
         """
         content_html = self.build_email_content(contact)
@@ -208,8 +204,7 @@ class NewsLetterSender(object):
 
         if self.newsletter.status == Newsletter.WAITING:
             self.newsletter.status = Newsletter.SENDING
-        if self.newsletter.status == Newsletter.SENDING and \
-               self.newsletter.mails_sent() >= \
+        if self.newsletter.status == Newsletter.SENDING and self.newsletter.mails_sent() >= \
                self.newsletter.mailing_list.expedition_set().count():
             self.newsletter.status = Newsletter.SENT
         self.newsletter.save()
@@ -242,16 +237,15 @@ class NewsLetterSender(object):
         if self.test:
             return self.newsletter.test_contacts.all()
 
-        already_sent = ContactMailingStatus.objects.filter(status=ContactMailingStatus.SENT,
-                                                           newsletter=self.newsletter).values_list('contact__id', flat=True)
+        already_sent = ContactMailingStatus.objects.filter(
+            status=ContactMailingStatus.SENT, newsletter=self.newsletter
+        ).values_list('contact__id', flat=True)
         expedition_list = self.newsletter.mailing_list.expedition_set().exclude(id__in=already_sent)
         return expedition_list
 
     def update_contact_status(self, contact, exception):
         if exception is None:
-            status = (self.test
-                      and ContactMailingStatus.SENT_TEST
-                      or ContactMailingStatus.SENT)
+            status = (self.test and ContactMailingStatus.SENT_TEST or ContactMailingStatus.SENT)
         elif isinstance(exception, (UnicodeError, SMTPRecipientsRefused)):
             status = ContactMailingStatus.INVALID
             contact.valid = False
@@ -295,14 +289,11 @@ class Mailer(NewsLetterSender):
                 continue
             
             if self.verbose:
-                print '- Processing %s/%s (%s)' % (
-                    i, number_of_recipients, contact.pk)
+                print '- Processing %s/%s (%s)' % (i, number_of_recipients, contact.pk)
 
             try:
                 message = self.build_message(contact)
-                self.smtp.sendmail(smart_str(self.newsletter.header_sender),
-                                   contact.email,
-                                   message.as_string())
+                self.smtp.sendmail(smart_str(self.newsletter.header_sender), contact.email, message.as_string())
             except Exception, e:
                 exception = e
             else:
@@ -310,8 +301,7 @@ class Mailer(NewsLetterSender):
 
             self.update_contact_status(contact, exception)
 
-            sleep_time = (delay * i -
-                          total_seconds(datetime.now() - start))
+            sleep_time = (delay * i - total_seconds(datetime.now() - start))
 
             if SLEEP_BETWEEN_SENDING and sleep_time:
                 time.sleep(sleep_time)
@@ -378,8 +368,7 @@ class SMTPMailer(object):
 
         i = 1
         sleep_time = 0
-        while (not self.stop_event.wait(sleep_time) and
-               not self.stop_event.is_set()):
+        while (not self.stop_event.wait(sleep_time) and not self.stop_event.is_set()):
             if not roundrobin:
                 candidates = self.get_candidates()
                 # refresh the list
@@ -405,8 +394,7 @@ class SMTPMailer(object):
                 else:
                     nl.next()
 
-                sleep_time = (delay * i -
-                              total_seconds(datetime.now() - self.start))
+                sleep_time = (delay * i - total_seconds(datetime.now() - self.start))
                 if SLEEP_BETWEEN_SENDING:
                     sleep_time = max(time.sleep(SLEEP_BETWEEN_SENDING), sleep_time)
                 if RESTART_CONNECTION_BETWEEN_SENDING:
@@ -426,8 +414,7 @@ class SMTPMailer(object):
 
     def get_candidates(self):
         """get candidates NL"""
-        return [NewsLetterExpedition(nl, self)
-                for nl in Newsletter.objects.filter(server=self.server)]
+        return [NewsLetterExpedition(nl, self) for nl in Newsletter.objects.filter(server=self.server)]
 
     def smtp_connect(self):
         """Make a connection to the SMTP"""
@@ -442,8 +429,7 @@ class NewsLetterExpedition(NewsLetterSender):
     """
 
     def __init__(self, newsletter, mailer):
-        super(NewsLetterExpedition, self).__init__(
-                        newsletter, test=mailer.test, verbose=mailer.verbose)
+        super(NewsLetterExpedition, self).__init__(newsletter, test=mailer.test, verbose=mailer.verbose)
         self.mailer = mailer
         self.id = newsletter.id
 
@@ -453,8 +439,8 @@ class NewsLetterExpedition(NewsLetterSender):
         newsletter = self.newsletter
 
         title = 'smtp-%s (%s), nl-%s (%s)' % (
-                        self.mailer.server.id, self.mailer.server.name[:10],
-                        newsletter.id, newsletter.title[:10])
+            self.mailer.server.id, self.mailer.server.name[:10], newsletter.id, newsletter.title[:10]
+        )
         # ajust len
         title = '%-30s' % title
 
@@ -464,22 +450,18 @@ class NewsLetterExpedition(NewsLetterSender):
 
         number_of_recipients = len(expedition_list)
         if self.verbose:
-            print '%s %s: %i emails will be sent' % (
-                    datetime.now().strftime('%Y-%m-%d'),
-                    title, number_of_recipients)
+            print '%s %s: %i emails will be sent' % (datetime.now().strftime('%Y-%m-%d'), title, number_of_recipients)
 
         try:
             i = 1
             for contact in expedition_list:
                 if self.verbose:
                     print '%s %s: processing %s/%s (%s)' % (
-                        datetime.now().strftime('%H:%M:%S'),
-                        title, i, number_of_recipients, contact.pk)
+                        datetime.now().strftime('%H:%M:%S'), title, i, number_of_recipients, contact.pk
+                    )
                 try:
                     message = self.build_message(contact)
-                    yield (smart_str(self.newsletter.header_sender),
-                                       contact.email,
-                                       message.as_string())
+                    yield (smart_str(self.newsletter.header_sender), contact.email, message.as_string())
                 except Exception, e:
                     exception = e
                 else:
@@ -487,8 +469,7 @@ class NewsLetterExpedition(NewsLetterSender):
 
                 self.update_contact_status(contact, exception)
                 i += 1
-                # this one permits us to save to database imediately
-                # and acknoledge eventual exceptions
+                # this one permits us to save to database immediately and acknowledge eventual exceptions
                 yield None
         finally:
             self.update_newsletter_status()

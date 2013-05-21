@@ -1,11 +1,11 @@
 """
 Urls for the emencia Mailing List
 """
-from django.conf.urls import url
 from django.conf.urls import patterns
+from django.conf.urls import url
 
-from emencia.forms import MailingListSubscriptionForm
 from emencia.forms import AllMailingListSubscriptionForm
+from emencia.forms import MailingListSubscriptionForm
 from emencia.forms import SubscriberVerificationForm
 from emencia.forms import VerificationMailingListSubscriptionForm
 

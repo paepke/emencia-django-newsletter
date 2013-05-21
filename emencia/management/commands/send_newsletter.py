@@ -1,11 +1,12 @@
 """Command for sending the newsletter"""
+import codecs
+
 from django.conf import settings
 from django.utils.translation import activate
 from django.core.management.base import NoArgsCommand
 
 from emencia.mailer import Mailer
 from emencia.models import Newsletter
-import codecs
 
 
 class Command(NoArgsCommand):
@@ -20,8 +21,7 @@ class Command(NoArgsCommand):
 
         activate(settings.LANGUAGE_CODE)
 
-        for newsletter in Newsletter.objects.exclude(
-            status=Newsletter.DRAFT).exclude(status=Newsletter.SENT):
+        for newsletter in Newsletter.objects.exclude(status=Newsletter.DRAFT).exclude(status=Newsletter.SENT):
             mailer = Mailer(newsletter, verbose=verbose)
             if mailer.can_send:
                 if verbose:

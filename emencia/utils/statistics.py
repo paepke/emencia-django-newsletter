@@ -5,8 +5,9 @@ from emencia.models import ContactMailingStatus as Status
 
 
 def smart_division(a, b):
-    """Not a really smart division, but avoid
-    to have ZeroDivisionError"""
+    """
+    Not a really smart division, but avoid to have ZeroDivisionError
+    """
     try:
         return float(a) / float(b)
     except ZeroDivisionError:
@@ -31,14 +32,16 @@ def get_newsletter_opening_statistics(status, recipients):
         unique_openings = unique_openings_percent = unknow_openings = \
                           unknow_openings_percent = opening_average = 0
 
-    return {'total_openings': total_openings,
-            'double_openings': total_openings - unique_openings,
-            'unique_openings': unique_openings,
-            'unique_openings_percent': unique_openings_percent,
-            'unknow_openings': unknow_openings,
-            'unknow_openings_percent': unknow_openings_percent,
-            'opening_average': opening_average,
-            'opening_deducted': openings_by_links_opened}
+    return {
+        'total_openings': total_openings,
+        'double_openings': total_openings - unique_openings,
+        'unique_openings': unique_openings,
+        'unique_openings_percent': unique_openings_percent,
+        'unknow_openings': unknow_openings,
+        'unknow_openings_percent': unknow_openings_percent,
+        'opening_average': opening_average,
+        'opening_deducted': openings_by_links_opened
+    }
 
 
 def get_newsletter_on_site_opening_statistics(status):
@@ -47,8 +50,7 @@ def get_newsletter_on_site_opening_statistics(status):
     total_on_site_openings = on_site_openings.count()
     unique_on_site_openings = len(set(on_site_openings.values_list('contact', flat=True)))
 
-    return {'total_on_site_openings': total_on_site_openings,
-            'unique_on_site_openings': unique_on_site_openings}
+    return {'total_on_site_openings': total_on_site_openings, 'unique_on_site_openings': unique_on_site_openings}
 
 
 def get_newsletter_clicked_link_statistics(status, recipients, openings):
@@ -68,14 +70,16 @@ def get_newsletter_clicked_link_statistics(status, recipients, openings):
 
     clicked_links_average = total_clicked_links and smart_division(total_clicked_links, unique_clicked_links) or 0.0
 
-    return {'total_clicked_links': total_clicked_links,
-            'total_clicked_links_percent': total_clicked_links_percent,
-            'double_clicked_links': double_clicked_links,
-            'double_clicked_links_percent': double_clicked_links_percent,
-            'unique_clicked_links': unique_clicked_links,
-            'unique_clicked_links_percent': unique_clicked_links_percent,
-            'clicked_links_by_openings': clicked_links_by_openings,
-            'clicked_links_average': clicked_links_average}
+    return {
+        'total_clicked_links': total_clicked_links,
+        'total_clicked_links_percent': total_clicked_links_percent,
+        'double_clicked_links': double_clicked_links,
+        'double_clicked_links_percent': double_clicked_links_percent,
+        'unique_clicked_links': unique_clicked_links,
+        'unique_clicked_links_percent': unique_clicked_links_percent,
+        'clicked_links_by_openings': clicked_links_by_openings,
+        'clicked_links_average': clicked_links_average
+    }
 
 
 def get_newsletter_unsubscription_statistics(status, recipients):
@@ -85,8 +89,10 @@ def get_newsletter_unsubscription_statistics(status, recipients):
     total_unsubscriptions = len(set(unsubscriptions.values_list('contact', flat=True)))
     total_unsubscriptions_percent = smart_division(total_unsubscriptions, recipients) * 100
 
-    return {'total_unsubscriptions': total_unsubscriptions,
-            'total_unsubscriptions_percent': total_unsubscriptions_percent}
+    return {
+        'total_unsubscriptions': total_unsubscriptions,
+        'total_unsubscriptions_percent': total_unsubscriptions_percent
+    }
 
 
 def get_newsletter_top_links(status):
@@ -101,9 +107,7 @@ def get_newsletter_top_links(status):
     top_links = []
     for link, score in sorted(links.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         unique_clicks = len(set(clicked_links.filter(link=link).values_list('contact', flat=True)))
-        top_links.append({'link': link,
-                          'total_clicks': score,
-                          'unique_clicks': unique_clicks})
+        top_links.append({'link': link, 'total_clicks': score, 'unique_clicks': unique_clicks})
 
     return {'top_links': top_links}
 
@@ -115,16 +119,19 @@ def get_newsletter_statistics(newsletter):
     post_sending_status = all_status.filter(creation_date__gte=newsletter.sending_date)
     mails_sent = post_sending_status.filter(status=Status.SENT).count()
 
-    statistics = {'tests_sent': all_status.filter(status=Status.SENT_TEST).count(),
-                  'mails_sent': mails_sent,
-                  'mails_to_send': recipients,
-                  'remaining_mails': recipients - mails_sent}
+    statistics = {
+        'tests_sent': all_status.filter(status=Status.SENT_TEST).count(),
+        'mails_sent': mails_sent,
+        'mails_to_send': recipients,
+        'remaining_mails': recipients - mails_sent
+    }
 
     statistics.update(get_newsletter_opening_statistics(post_sending_status, recipients))
     statistics.update(get_newsletter_on_site_opening_statistics(post_sending_status))
     statistics.update(get_newsletter_unsubscription_statistics(post_sending_status, recipients))
-    statistics.update(get_newsletter_clicked_link_statistics(post_sending_status, recipients,
-                                                             statistics['total_openings']))
+    statistics.update(
+        get_newsletter_clicked_link_statistics(post_sending_status, recipients, statistics['total_openings'])
+    )
     statistics.update(get_newsletter_top_links(post_sending_status))
 
     return statistics

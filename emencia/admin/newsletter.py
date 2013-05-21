@@ -30,19 +30,17 @@ class AttachmentAdminInline(admin.TabularInline):
 
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('title', 'mailing_list', 'server', 'status',
-                    'sending_date', 'creation_date', 'modification_date',
+    list_display = ('title', 'mailing_list', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',
                     'historic_link', 'statistics_link')
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'content', 'header_sender', 'header_reply')
     filter_horizontal = ['test_contacts']
-    fieldsets = ((None, {'fields': ('title', 'template', 'content', 'public',)}),
-                 (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
-                 (_('Sending'), {'fields': ('sending_date', 'status',)}),
-                 (_('Miscellaneous'), {'fields': ('server', 'header_sender',
-                                                  'header_reply', 'slug'),
-                                       'classes': ('collapse',)}),
-                 )
+    fieldsets = (
+        (None, {'fields': ('title', 'template', 'content', 'public',)}),
+        (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
+        (_('Sending'), {'fields': ('sending_date', 'status',)}),
+        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
+    )
     prepopulated_fields = {'slug': ('title',)}
     inlines = (AttachmentAdminInline,)
     actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'duplicate']
@@ -99,10 +97,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         try:
             newsletter.save()
         except:
-            self.message_user(
-                request,
-                _('Unable to download HTML, due to errors within.')
-            )
+            self.message_user(request, _('Unable to download HTML, due to errors within.'))
 
         for workgroup in workgroups:
             workgroup.newsletters.add(newsletter)
@@ -161,8 +156,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
 
     def make_cancel_sending(self, request, queryset):
         """Cancel the sending of newsletters"""
-        queryset = queryset.filter(Q(status=Newsletter.WAITING) |
-                                   Q(status=Newsletter.SENDING))
+        queryset = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
         for newsletter in queryset:
             newsletter.status = Newsletter.CANCELED
             newsletter.save()

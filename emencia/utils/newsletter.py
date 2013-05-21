@@ -2,6 +2,7 @@
 import re
 
 from bs4 import BeautifulSoup
+
 from django.core.urlresolvers import reverse
 
 from emencia.models import Link
@@ -49,10 +50,7 @@ def track_links(content, context):
                     context['domain'], 
                     reverse(
                         'newsletter_newsletter_tracking_link', 
-                        args=[context['newsletter'].slug, 
-                              context['uidb36'], 
-                              context['token'], 
-                              link.pk]
+                        args=[context['newsletter'].slug, context['uidb36'], context['token'], link.pk]
                     )
                 )
 

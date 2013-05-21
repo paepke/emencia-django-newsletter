@@ -1,8 +1,8 @@
 """
 Urls for the emencia Tracking
 """
-from django.conf.urls import url
 from django.conf.urls import patterns
+from django.conf.urls import url
 
 urlpatterns = patterns(
     'emencia.views.tracking',

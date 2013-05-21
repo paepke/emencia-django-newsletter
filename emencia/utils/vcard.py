@@ -1,7 +1,7 @@
 """VCard system for exporting Contact models"""
-from datetime import datetime
-
 import vobject
+
+from datetime import datetime
 
 from django.http import HttpResponse
 

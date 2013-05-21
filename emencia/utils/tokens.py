@@ -7,16 +7,16 @@ from emencia.models import Contact
 
 
 class ContactTokenGenerator(object):
-    """ContactTokengenerator for the newsletter
-    based on the PasswordResetTokenGenerator bundled
-    in django.contrib.auth"""
+    """
+    ContactTokengenerator for the newsletter based on the PasswordResetTokenGenerator bundled
+    in django.contrib.auth
+    """
 
     def make_token(self, contact):
         """Method for generating the token"""
         from django.utils.hashcompat import sha_constructor
 
-        token = sha_constructor(settings.SECRET_KEY + unicode(contact.id) +
-                                contact.email).hexdigest()[::2]
+        token = sha_constructor(settings.SECRET_KEY + unicode(contact.id) + contact.email).hexdigest()[::2]
         return token
 
     def check_token(self, contact, token):

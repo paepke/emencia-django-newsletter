@@ -1,15 +1,13 @@
 """Utils for importation of contacts"""
 import csv
-from datetime import datetime
-
 import xlrd
 import vobject
 
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from datetime import datetime
 
-from tagging.models import Tag
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.utils.translation import ugettext_lazy as _
 
 from emencia.models import Contact
 from emencia.models import MailingList
@@ -35,10 +33,8 @@ def create_contact(contact_dict):
     return contact, created
 
 
-def create_contacts(contact_dicts, importer_name,
-                    mailing_list=None, segment=None):
-    """Create all the contacts to import and
-    associated them in a mailing list"""
+def create_contacts(contact_dicts, importer_name, mailing_list=None, segment=None):
+    """Create all the contacts to import and associated them in a mailing list"""
     inserted = 0
     when = str(datetime.now()).split('.')[0]
 

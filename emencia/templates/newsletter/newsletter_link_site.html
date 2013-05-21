@@ -1,8 +1,9 @@
 {% load i18n %}
 <div id="links">
-  <a name="links"></a>
-  <p>{% url "newsletter_newsletter_contact" slug=newsletter.slug uidb36=uidb36 token=token as contact_url %}
-    {% trans "If you cannot see this email," %}
-    <a href="http://{{ domain }}{{ contact_url }}">{% trans "click here" %}</a>.
-  </p>
+    <a name="links"></a>
+
+    <p>{% url "newsletter_newsletter_contact" slug=newsletter.slug uidb36=uidb36 token=token as contact_url %}
+        {% trans "If you cannot see this email," %}
+        <a href="http://{{ domain }}{{ contact_url }}">{% trans "click here" %}</a>.
+    </p>
 </div>

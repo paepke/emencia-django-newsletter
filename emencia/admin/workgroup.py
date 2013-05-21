@@ -6,10 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class WorkGroupAdmin(admin.ModelAdmin):
-    list_display = (
-        'name', 'group', 'contacts_length',
-        'mailinglists_length', 'newsletters_length'
-    )
+    list_display = ('name', 'group', 'contacts_length', 'mailinglists_length', 'newsletters_length')
     fieldsets = (
         (None, {'fields': ('name', 'group')}),
         (None, {'fields': ('contacts', 'mailinglists', 'newsletters')}),
