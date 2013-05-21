@@ -21,12 +21,6 @@ from django.template.loader import render_to_string
 from django.template.loader import get_template
 
 from emencia.settings import INCLUDE_UNSUBSCRIPTION
-from emencia.settings import TRACKING_LINKS
-
-# --- template --- start ------------------------------------------------------
-from django.template.loader import render_to_string
-from emencia.settings import USE_TEMPLATE
-# --- template --- end --------------------------------------------------------
 
 def render_newsletter(request, slug, context):
     """Return a newsletter in HTML format"""

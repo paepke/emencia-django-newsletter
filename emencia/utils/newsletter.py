@@ -31,8 +31,9 @@ def body_insertion(content, insertion, end=False):
 
 
 def track_links(content, context):
-    """Convert all links in the template for the user
-    to track his navigation"""
+    """
+    Convert all links in the template for the user to track his navigation
+    """
     if not context.get('uidb36'):
         return content
 
