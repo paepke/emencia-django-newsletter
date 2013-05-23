@@ -23,11 +23,15 @@ from emencia.settings import DEFAULT_HEADER_SENDER
 from emencia.utils.vcard import vcard_contact_export
 from emencia.utils.template import get_templates
 
+from premailer import transform
+
 from smtplib import SMTP
 from smtplib import SMTP_SSL
 from smtplib import SMTPHeloError
 
 from tagging.fields import TagField
+
+from urllib2 import urlopen
 
 # Patch for Python < 2.6
 try:
@@ -337,6 +341,11 @@ class Newsletter(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.content.startswith('http://'):
+            self.content = transform(urlopen(self.content.strip()).read())
+        super(Newsletter, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('-creation_date',)

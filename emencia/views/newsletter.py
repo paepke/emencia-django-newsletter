@@ -43,7 +43,11 @@ def render_newsletter(request, slug, context):
     if TRACKING_LINKS:
         message = track_links(message, context)
 
-    return render_to_response("newsletter/%s" % newsletter.template, context, context_instance=RequestContext(request))
+    return render_to_response(
+        'mailtemplates/{0}/{1}'.format(newsletter.template, 'index.html'),
+        context,
+        context_instance=RequestContext(request)
+    )
 
 
 @staff_member_required
