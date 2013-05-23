@@ -8,29 +8,6 @@ from django.core.urlresolvers import reverse
 from emencia.models import Link
 from emencia.settings import USE_PRETTIFY
 
-# --- tracking ignore anchor --- start ----------------------------------------
-from emencia.django.newsletter.settings import TRACKING_IGNORE_ANCHOR
-# --- tracking ignore anchor --- end ------------------------------------------
-
-
-def body_insertion(content, insertion, end=False):
-    """Insert an HTML content into the body HTML node"""
-    if not content.startswith('<body'):
-        content = '<body>%s</body>' % content
-    soup = BeautifulSoup(content)
-    insertion = BeautifulSoup(insertion)
-
-    if end:
-        soup.body.append(insertion)
-    else:
-        soup.body.insert(0, insertion)
-  
-    if USE_PRETTIFY:
-        return soup.prettify()
-    else:
-        return soup.renderContents()
-
-
 def track_links(content, context):
     """
     Convert all links in the template for the user to track his navigation
@@ -66,6 +43,7 @@ def track_links(content, context):
         return soup.prettify()
     else:
         return soup.renderContents()
+
 
 def fix_tinymce_links(content):
     """ Clean the src attribute of images in content edited with TinyMCE and django-filebrowser"""

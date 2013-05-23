@@ -37,7 +37,6 @@ from emencia.settings import UNIQUE_KEY_LENGTH
 from emencia.settings import UNIQUE_KEY_CHAR_SET
 from emencia.utils.tokens import tokenize
 from emencia.utils.newsletter import track_links
-from emencia.utils.newsletter import body_insertion
 from emencia.utils.newsletter import fix_tinymce_links
 
 from html2text import html2text as html2text_orig
@@ -238,7 +237,7 @@ class NewsLetterSender(object):
             image_tracking = render_to_string('newsletter/newsletter_image_tracking.html', context)
             context.update({'image_tracking': image_tracking})
 
-        content_template = get_template("newsletter/%s" % self.newsletter.template)
+        content_template = get_template('mailtemplates/{0}/{1}'.format(self.newsletter.template, 'index.html'))
         content = content_template.render(context)
 
         if TRACKING_LINKS:
