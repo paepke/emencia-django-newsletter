@@ -27,9 +27,10 @@ kwalitee:
 
 translations:
 	@echo "$(COLOR)* Generating english translation$(NO_COLOR)"
-	@cd emencia/django/newsletter && ../../../bin/django makemessages --extension=.html,.txt -l en
+	@cd emencia && django-admin.py makemessages --extension=.html,.txt -l en
 	@echo "$(COLOR)* Pushing translation to Transifex$(NO_COLOR)"
 	@rm -rf .tox
+	@msgfilter -i emencia/locale/en/LC_MESSAGES/django.po -o emencia/locale/django.pot true
 	@tx push -s
 
 clean:
