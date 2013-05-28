@@ -1,7 +1,7 @@
 # --- subscriber verification --- start ---------------------------------------
 from django.contrib import admin
 
-from emencia.django.newsletter.models \
+from emencia.models \
     import SubscriberVerification
 
 class SubscriberVerificationAdmin(admin.ModelAdmin):
