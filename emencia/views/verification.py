@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Views for emencia.django.newsletter Subscriber Verification
+Views for emencia Subscriber Verification
 """
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -9,9 +9,9 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
-from emencia.django.newsletter.models \
+from emencia.models \
     import SMTPServer, MailingList, SubscriberVerification
-from emencia.django.newsletter.settings import DEFAULT_HEADER_REPLY
+from emencia.settings import DEFAULT_HEADER_REPLY
 
 from django.utils import translation
 
