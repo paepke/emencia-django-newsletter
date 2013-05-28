@@ -80,59 +80,8 @@ class NewsLetterSender(object):
         self.test = test
         self.verbose = verbose
         self.newsletter = newsletter
+        # self.newsletter_template = Template(self.newsletter.content)  #kapt removed this
         self.title_template = Template(self.newsletter.title)
-
-    def run(self):
-        """Send the mails"""
-        if not self.can_send:
-            return
-
-        if not self.smtp:
-            self.smtp_connect()
-
-        self.attachments = self.build_attachments()
-
-        number_of_recipients = len(self.expedition_list)
-        if self.verbose:
-            print '%i emails will be sent' % number_of_recipients
-
-        i = 1
-        for contact in self.expedition_list:
-            # --- subscriber verification --- start ---------------------------
-            if SUBSCRIBER_VERIFICATION:
-                if not contact.verified:
-                    print '- No verified email: {0}'.format(contact.email)
-                    continue
-            # --- subscriber verification --- end -----------------------------
-
-            if self.verbose:
-                print '- Processing %s/%s (%s)' % (
-                    i, number_of_recipients, contact.pk)
-
-            try:
-                message = self.build_message(contact)
-                self.smtp.sendmail(smart_str(self.newsletter.header_sender),
-                                   contact.email,
-                                   message.as_string())
-                status = self.test and ContactMailingStatus.SENT_TEST \
-                         or ContactMailingStatus.SENT
-            except (UnicodeError, SMTPRecipientsRefused):
-                status = ContactMailingStatus.INVALID
-                contact.valid = False
-                contact.save()
-            except:
-                status = ContactMailingStatus.ERROR
-
-            ContactMailingStatus.objects.create(newsletter=self.newsletter,
-                                                contact=contact, status=status)
-            if SLEEP_BETWEEN_SENDING:
-                time.sleep(SLEEP_BETWEEN_SENDING)
-            if RESTART_CONNECTION_BETWEEN_SENDING:
-                self.smtp.quit()
-                self.smtp_connect()
-            i += 1
-        self.smtp.quit()
-        self.update_newsletter_status()
 
     def build_message(self, contact):
         """
@@ -201,12 +150,8 @@ class NewsLetterSender(object):
 
     def build_email_content(self, contact):
         """Generate the mail for a contact"""
-        link_site = unsubscription = image_tracking = ''
-
-        uidb36, token = tokenize(contact)
-
-        pre_context = {
-
+        # link_site = unsubscription = image_tracking = ''
+        
         uidb36, token = tokenize(contact)
         domain = Site.objects.get_current().domain
         context = Context({
@@ -214,7 +159,8 @@ class NewsLetterSender(object):
             'domain': domain,
             'newsletter': self.newsletter,
             'tracking_image_format': TRACKING_IMAGE_FORMAT,
-            'uidb36': uidb36, 'token': token,
+            'uidb36': uidb36,
+            'token': token,
         })
 
         message_content = fix_tinymce_links(self.newsletter.content)
@@ -225,10 +171,10 @@ class NewsLetterSender(object):
 
         context.update({'message': message})
 
+        # link_site_exist = False
         link_site = render_to_string('newsletter/newsletter_link_site.html', context)
         context.update({'link_site': link_site})
 
-        # --- template --- start ----------------------------------------------
         if INCLUDE_UNSUBSCRIPTION:
             unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
             context.update({'unsubscription': unsubscription})
@@ -254,7 +200,7 @@ class NewsLetterSender(object):
         """Update the status of the newsletter"""
         if self.test:
             return
-
+        
         if self.newsletter.status == Newsletter.WAITING:
             self.newsletter.status = Newsletter.SENDING
         if self.newsletter.status == Newsletter.SENDING and self.newsletter.mails_sent() >= \

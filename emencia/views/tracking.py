@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Views for emencia Tracking"""
 import base64
 

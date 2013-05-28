@@ -6,9 +6,6 @@ from emencia.models import Contact
 from emencia.models import MailingList
 from emencia.models import SubscriberVerification
 
-from emencia.models import Contact
-from emencia.models import MailingList
-
 
 class MailingListSubscriptionForm(forms.ModelForm):
     """

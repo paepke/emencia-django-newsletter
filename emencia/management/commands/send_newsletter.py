@@ -8,6 +8,7 @@ from django.core.management.base import NoArgsCommand
 from emencia.mailer import Mailer
 from emencia.models import Newsletter
 
+
 class Command(NoArgsCommand):
     """Send the newsletter in queue"""
     help = 'Send the newsletter in queue'

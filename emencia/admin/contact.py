@@ -92,8 +92,7 @@ class ContactAdmin(admin.ModelAdmin):
     def export_excel(self, request, queryset, export_name=''):
         """Export selected contact in Excel"""
         if not export_name:
-            export_name = 'contacts_edn_%s' % \
-                    datetime.now().strftime('%d-%m-%Y')
+            export_name = 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y')
         return ExcelResponse(queryset, export_name)
     export_excel.short_description = _('Export contacts in Excel')
 
@@ -147,6 +146,8 @@ class ContactAdmin(admin.ModelAdmin):
 
         context = {'title': _('Contact importation'),
                    'opts': opts,
+                   #~ 'root_path': self.admin_site.root_path,  TODO: Investigate this further
+                   'root_path': reverse('admin:index'),
                    'app_label': opts.app_label}
 
         return render_to_response('newsletter/contact_import.html', context, RequestContext(request))

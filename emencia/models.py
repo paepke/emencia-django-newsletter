@@ -21,6 +21,7 @@ from emencia.settings import MAILER_HARD_LIMIT
 from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import DEFAULT_HEADER_SENDER
 from emencia.utils.vcard import vcard_contact_export
+from emencia.utils.template import get_templates
 
 from premailer import transform
 
@@ -148,10 +149,6 @@ class SMTPServer(models.Model):
 
 class Contact(models.Model):
     """Contact for emailing"""
-    # --- subscriber verification --- start -----------------------------------
-    if SUBSCRIBER_VERIFICATION:
-        verified = models.BooleanField('verified', default=False)
-    # --- subscriber verification --- end -------------------------------------
 
     email = models.EmailField(_('email'))
     verified = models.BooleanField('verified', default=False)
@@ -165,8 +162,7 @@ class Contact(models.Model):
     tester = models.BooleanField(_('contact tester'), default=False)
 
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-    modification_date = models.DateTimeField(_('modification date'),
-                                             auto_now=True)
+    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
 
     objects = ContactManager()
 
@@ -231,8 +227,7 @@ class MailingList(models.Model):
     )
 
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-    modification_date = models.DateTimeField(_('modification date'),
-                                             auto_now=True)
+    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
 
     def subscribers_count(self):
         return self.subscribers.all().count()
@@ -256,6 +251,9 @@ class MailingList(models.Model):
 
 
 class MailingListSegment(models.Model):
+    """ 
+    TODO: Work out what this class/model does now
+    """
     name = models.CharField(_('name'), max_length=255)
     mailing_list = models.ForeignKey(MailingList, null=False, related_name="segments")
     position = models.IntegerField(default=1)
@@ -296,7 +294,9 @@ class Newsletter(models.Model):
         _('content'), help_text=_('Or paste an URL.'), default=_('<!-- Edit your newsletter here -->')
     )
 
-    template = models.CharField(verbose_name=_('template'), max_length=200, choices=TEMPLATES, default=TEMPLATES[0][0])
+    template = models.CharField(verbose_name=_('template'), max_length=200, choices=get_templates())
+
+    public = models.BooleanField(_('public'), default=False)
 
     mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
@@ -305,15 +305,12 @@ class Newsletter(models.Model):
     header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
     header_reply = models.CharField(_('reply to'), max_length=255, default=DEFAULT_HEADER_REPLY)
 
-    status = models.IntegerField(_('status'), choices=STATUS_CHOICES,
-                                 default=DRAFT)
-    sending_date = models.DateTimeField(_('sending date'),
-                                        default=datetime.now)
+    status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
+    sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
 
     slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'), unique=True)
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-    modification_date = models.DateTimeField(_('modification date'),
-                                             auto_now=True)
+    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
 
     def status_str(self):
         for (code, string) in self.STATUS_CHOICES:
@@ -321,9 +318,7 @@ class Newsletter(models.Model):
                 return string
 
     def mails_sent(self):
-        return self.contactmailingstatus_set.filter(
-            status=ContactMailingStatus.SENT
-        ).count()
+        return self.contactmailingstatus_set.filter(status=ContactMailingStatus.SENT).count()
 
     @models.permalink
     def get_absolute_url(self):
@@ -449,6 +444,7 @@ class WorkGroup(models.Model):
     class Meta:
         verbose_name = _('workgroup')
         verbose_name_plural = _('workgroups')
+
 
 class SubscriberVerification(models.Model):
     link_id = models.CharField( _('link_id'), max_length=255, default=uuid.uuid4)

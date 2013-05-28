@@ -9,6 +9,7 @@ from django.template import RequestContext
 from django.template import Template
 
 from django.contrib.sites.models import Site
+from django.template.loader import render_to_string
 
 from emencia.models import ContactMailingStatus
 from emencia.models import Newsletter
@@ -17,7 +18,6 @@ from emencia.settings import TRACKING_LINKS
 from emencia.utils.newsletter import track_links
 from emencia.utils.tokens import untokenize
 
-from emencia.settings import INCLUDE_UNSUBSCRIPTION
 
 def render_newsletter(request, slug, context):
     """Return a newsletter in HTML format"""
