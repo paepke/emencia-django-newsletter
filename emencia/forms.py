@@ -90,4 +90,4 @@ class SubscriberVerificationForm(forms.ModelForm):
     """
     class Meta:
         model = Contact
-        exclude = ('verified', 'subscriber', 'valid', 'tester', 'tags', 'content_type', 'object_id')
+        exclude = ('verified', 'subscriber', 'valid', 'tester')
