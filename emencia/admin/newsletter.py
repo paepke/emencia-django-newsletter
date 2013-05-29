@@ -15,6 +15,8 @@ from emencia.models import MailingList
 from emencia.mailer import Mailer
 from emencia.settings import USE_TINYMCE, USE_CKEDITOR
 from emencia.settings import USE_WORKGROUPS
+from emencia.settings import DEFAULT_HEADER_SENDER
+from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import TINYMCE_WIDGET_ATTRS
 from emencia.utils.workgroups import request_workgroups
 from emencia.utils.workgroups import request_workgroups_contacts_pk
@@ -60,6 +62,14 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
             newsletters_pk = request_workgroups_newsletters_pk(request)
             queryset = queryset.filter(pk__in=newsletters_pk)
         return queryset
+
+    def formfield_for_dbfield(self, field, **kwargs):
+        print repr(field)
+        if field.name == 'header_sender':
+            kwargs['initial'] = DEFAULT_HEADER_SENDER
+        if field.name == 'header_reply':
+            kwargs['initial'] = DEFAULT_HEADER_REPLY
+        return super(BaseNewsletterAdmin, self).formfield_for_dbfield(field, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'mailing_list' and not request.user.is_superuser and USE_WORKGROUPS:

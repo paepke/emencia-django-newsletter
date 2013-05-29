@@ -302,8 +302,9 @@ class Newsletter(models.Model):
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
 
     server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
-    header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
-    header_reply = models.CharField(_('reply to'), max_length=255, default=DEFAULT_HEADER_REPLY)
+
+    header_sender = models.CharField(_('sender'), max_length=255)
+    header_reply = models.CharField(_('reply to'), max_length=255)
 
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
     sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
