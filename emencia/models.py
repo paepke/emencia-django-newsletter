@@ -1,7 +1,7 @@
 """
 Models for emencia
 """
-import uuid
+from uuidfield import UUIDField
 
 from datetime import datetime
 from datetime import timedelta
@@ -447,7 +447,7 @@ class WorkGroup(models.Model):
 
 
 class SubscriberVerification(models.Model):
-    link_id = models.CharField( _('link_id'), max_length=255, default=uuid.uuid4)
+    link_id = UUIDField(name=_('link_id'), auto=True)
     contact = models.ForeignKey(Contact)
 
     def __unicode__(self):

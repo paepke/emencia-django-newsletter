@@ -40,4 +40,5 @@ setup(name='emencia',
                         'xlrd',
                         'premailer',
                         'django-filebrowser-no-grappelli',
-                        'django-tinymce'])
+                        'django-tinymce',
+                        'django-uuidfield'])
