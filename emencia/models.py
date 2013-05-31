@@ -298,7 +298,7 @@ class Newsletter(models.Model):
 
     public = models.BooleanField(_('public'), default=False)
 
-    mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
+    mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'), null=True)
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
 
     server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)

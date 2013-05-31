@@ -11,23 +11,21 @@ class Migration(SchemaMigration):
         # Removing unique constraint on 'Contact', fields ['email']
         db.delete_unique('emencia_contact', ['email'])
 
-        # Deleting field 'Contact.content_type'
-        db.delete_column('emencia_contact', 'content_type_id')
+        # Adding field 'Contact.owner'
+        db.add_column('emencia_contact', 'owner',
+                      self.gf('django.db.models.fields.IntegerField')(default=0),
+                      keep_default=False)
 
-        # Deleting field 'Contact.object_id'
-        db.delete_column('emencia_contact', 'object_id')
+        # Adding unique constraint on 'Contact', fields ['owner', 'email']
+        db.create_unique('emencia_contact', ['owner', 'email'])
 
 
     def backwards(self, orm):
-        # Adding field 'Contact.content_type'
-        db.add_column('emencia_contact', 'content_type',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'], null=True, blank=True),
-                      keep_default=False)
+        # Removing unique constraint on 'Contact', fields ['owner', 'email']
+        db.delete_unique('emencia_contact', ['owner', 'email'])
 
-        # Adding field 'Contact.object_id'
-        db.add_column('emencia_contact', 'object_id',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True),
-                      keep_default=False)
+        # Deleting field 'Contact.owner'
+        db.delete_column('emencia_contact', 'owner')
 
         # Adding unique constraint on 'Contact', fields ['email']
         db.create_unique('emencia_contact', ['email'])
@@ -62,13 +60,14 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'emencia.contact': {
-            'Meta': {'ordering': "('creation_date',)", 'object_name': 'Contact'},
+            'Meta': {'ordering': "('creation_date',)", 'unique_together': "(('email', 'owner'),)", 'object_name': 'Contact'},
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'owner': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'subscriber': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'tester': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
@@ -112,11 +111,13 @@ class Migration(SchemaMigration):
             'server': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': "orm['emencia.SMTPServer']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '50'}),
             'status': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'template': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'test_contacts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['emencia.Contact']", 'null': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'emencia.smtpserver': {
             'Meta': {'object_name': 'SMTPServer'},
+            'emails_remains': ('django.db.models.fields.IntegerField', [], {'default': '10000'}),
             'headers': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'host': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
