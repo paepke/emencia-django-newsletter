@@ -41,7 +41,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         (None, {'fields': ('title', 'template', 'content', 'public',)}),
         (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
         (_('Sending'), {'fields': ('sending_date', 'status',)}),
-        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
+        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'base_url', 'slug'), 'classes': ('collapse',)}),
     )
     prepopulated_fields = {'slug': ('title',)}
     inlines = (AttachmentAdminInline,)
@@ -64,11 +64,12 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         return queryset
 
     def formfield_for_dbfield(self, field, **kwargs):
-        print repr(field)
         if field.name == 'header_sender':
             kwargs['initial'] = DEFAULT_HEADER_SENDER
         if field.name == 'header_reply':
             kwargs['initial'] = DEFAULT_HEADER_REPLY
+        if field.name == 'base_url':
+            kwargs['initial'] = "%s://%s" % ('https' if kwargs['request'].is_secure() else 'http', kwargs['request'].get_host())
         return super(BaseNewsletterAdmin, self).formfield_for_dbfield(field, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

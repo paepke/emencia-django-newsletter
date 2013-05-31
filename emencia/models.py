@@ -295,6 +295,7 @@ class Newsletter(models.Model):
     )
 
     template = models.CharField(verbose_name=_('template'), max_length=200, choices=get_templates())
+    base_url = models.CharField(verbose_name=_('base URL'), max_length=200, null=True, blank=True)
 
     public = models.BooleanField(_('public'), default=False)
 

@@ -153,10 +153,10 @@ class NewsLetterSender(object):
         # link_site = unsubscription = image_tracking = ''
         
         uidb36, token = tokenize(contact)
-        domain = Site.objects.get_current().domain
+        base_url = self.newsletter.base_url
         context = Context({
             'contact': contact,
-            'domain': domain,
+            'base_url': base_url,
             'newsletter': self.newsletter,
             'tracking_image_format': TRACKING_IMAGE_FORMAT,
             'uidb36': uidb36,
@@ -191,7 +191,7 @@ class NewsLetterSender(object):
 
         content = smart_unicode(content)
 
-        p = Premailer(content, base_url="http://%s" % domain, preserve_internal_links=True)
+        p = Premailer(content, base_url=base_url, preserve_internal_links=True)
         content = p.transform()
 
         return content

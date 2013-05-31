@@ -8,7 +8,6 @@ from django.template import Context
 from django.template import RequestContext
 from django.template import Template
 
-from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 
 from emencia.models import ContactMailingStatus
@@ -26,7 +25,7 @@ def render_newsletter(request, slug, context):
     context.update({
         'newsletter': newsletter,
         'title': newsletter.title,
-        'domain': Site.objects.get_current().domain,
+        'base_url': newsletter.base_url,
     })
 
     message_content = newsletter.content
