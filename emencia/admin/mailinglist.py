@@ -128,4 +128,5 @@ class MailingListAdmin(admin.ModelAdmin):
 
 
 class SubscriberVerificationAdmin(admin.ModelAdmin):
+    readonly_fields = ("link_id",)
     fields = ['link_id', 'contact']
