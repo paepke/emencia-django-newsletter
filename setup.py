@@ -41,4 +41,5 @@ setup(name='emencia',
                         'premailer',
                         'django-filebrowser-no-grappelli',
                         'django-tinymce',
-                        'django-uuidfield'])
+                        'django-uuidfield',
+                        'django-autoslug==1.6.1'])

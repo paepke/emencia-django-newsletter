@@ -15,6 +15,8 @@ from django.utils.encoding import force_unicode
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 
+from autoslug import AutoSlugField
+
 from emencia.managers import ContactManager
 from emencia.settings import BASE_PATH
 from emencia.settings import MAILER_HARD_LIMIT
@@ -307,7 +309,7 @@ class Newsletter(models.Model):
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
     sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
 
-    slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'), unique=True)
+    slug = AutoSlugField(help_text=_('Used for displaying the newsletter on the site.'), populate_from="title", unique=True)
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
 

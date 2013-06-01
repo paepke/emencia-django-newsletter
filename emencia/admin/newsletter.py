@@ -41,9 +41,8 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         (None, {'fields': ('title', 'template', 'content', 'public',)}),
         (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
         (_('Sending'), {'fields': ('sending_date', 'status',)}),
-        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'base_url', 'slug'), 'classes': ('collapse',)}),
+        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'base_url'), 'classes': ('collapse',)}),
     )
-    prepopulated_fields = {'slug': ('title',)}
     inlines = (AttachmentAdminInline,)
     actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'duplicate']
     actions_on_top = False
@@ -179,9 +178,8 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         for newsletter in queryset:
             newsletter.pk = None
             i = 1
-            while Newsletter.objects.filter(slug=u'%s-%s' % (newsletter.slug, i)).count() > 0:
+            while Newsletter.objects.filter(title=u'%s [%s]' % (newsletter.title, i)).count() > 0:
                 i += 1
-            newsletter.slug = u'%s-%s' % (newsletter.slug, i)
             newsletter.title = u'%s [%s]' % (newsletter.title, i)
             newsletter.save()
 
