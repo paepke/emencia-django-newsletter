@@ -191,8 +191,6 @@ class Contact(models.Model):
     mail_format.short_description = _('mail format')
 
     def get_absolute_url(self):
-        if self.content_type and self.object_id:
-            return self.content_object.get_absolute_url()
         urlname = 'admin:%s_contact_change' % self._meta.app_label
         return reverse(urlname, args=[self.pk])
 
