@@ -8,15 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Newsletter.public'
-        db.add_column('emencia_newsletter', 'public',
+        # Adding field 'Contact.verified'
+        db.add_column('emencia_contact', 'verified',
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Newsletter.public'
-        db.delete_column('emencia_newsletter', 'public')
+        # Deleting field 'Contact.verified'
+        db.delete_column('emencia_contact', 'verified')
 
 
     models = {
@@ -48,14 +48,13 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'emencia.contact': {
-            'Meta': {'ordering': "('creation_date',)", 'unique_together': "(('email', 'owner'),)", 'object_name': 'Contact'},
+            'Meta': {'ordering': "('creation_date',)", 'object_name': 'Contact'},
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75'}),
+            'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'owner': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'subscriber': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'tester': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -98,14 +97,13 @@ class Migration(SchemaMigration):
         },
         'emencia.newsletter': {
             'Meta': {'ordering': "('-creation_date',)", 'object_name': 'Newsletter'},
-            'content': ('django.db.models.fields.TextField', [], {'default': "u'<!-- Edit your newsletter here -->'"}),
+            'content': ('django.db.models.fields.TextField', [], {'default': "u'<body>\\n<!-- Edit your newsletter here -->\\n</body>'"}),
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'header_reply': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'header_sender': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'header_reply': ('django.db.models.fields.CharField', [], {'default': "'My NewsLetter <newsletter@a2v.eu>'", 'max_length': '255'}),
+            'header_sender': ('django.db.models.fields.CharField', [], {'default': "'My NewsLetter <newsletter@a2v.eu>'", 'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'mailing_list': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.MailingList']", 'null': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'sending_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'server': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': "orm['emencia.SMTPServer']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '50'}),

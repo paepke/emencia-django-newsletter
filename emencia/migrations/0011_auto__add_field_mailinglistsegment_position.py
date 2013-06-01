@@ -8,27 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Removing unique constraint on 'Contact', fields ['email']
-        db.delete_unique('emencia_contact', ['email'])
-
-        # Adding field 'Contact.owner'
-        db.add_column('emencia_contact', 'owner',
-                      self.gf('django.db.models.fields.IntegerField')(default=0),
+        # Adding field 'MailingListSegment.position'
+        db.add_column('emencia_mailinglistsegment', 'position',
+                      self.gf('django.db.models.fields.IntegerField')(default=1),
                       keep_default=False)
-
-        # Adding unique constraint on 'Contact', fields ['owner', 'email']
-        db.create_unique('emencia_contact', ['owner', 'email'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'Contact', fields ['owner', 'email']
-        db.delete_unique('emencia_contact', ['owner', 'email'])
-
-        # Deleting field 'Contact.owner'
-        db.delete_column('emencia_contact', 'owner')
-
-        # Adding unique constraint on 'Contact', fields ['email']
-        db.create_unique('emencia_contact', ['email'])
+        # Deleting field 'MailingListSegment.position'
+        db.delete_column('emencia_mailinglistsegment', 'position')
 
 
     models = {
@@ -60,14 +48,13 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'emencia.contact': {
-            'Meta': {'ordering': "('creation_date',)", 'unique_together': "(('email', 'owner'),)", 'object_name': 'Contact'},
+            'Meta': {'ordering': "('creation_date',)", 'object_name': 'Contact'},
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75'}),
+            'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'owner': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'subscriber': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'tester': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
@@ -97,6 +84,14 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'mailinglist_subscriber'", 'symmetrical': 'False', 'to': "orm['emencia.Contact']"}),
             'unsubscribers': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'mailinglist_unsubscriber'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['emencia.Contact']"})
+        },
+        'emencia.mailinglistsegment': {
+            'Meta': {'ordering': "('position',)", 'object_name': 'MailingListSegment'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'mailing_list': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'segments'", 'to': "orm['emencia.MailingList']"}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'position': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
+            'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['emencia.Contact']", 'symmetrical': 'False'})
         },
         'emencia.newsletter': {
             'Meta': {'ordering': "('-creation_date',)", 'object_name': 'Newsletter'},

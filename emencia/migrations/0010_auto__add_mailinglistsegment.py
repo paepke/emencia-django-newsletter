@@ -8,15 +8,29 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Contact.verified'
-        db.add_column('emencia_contact', 'verified',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
+        # Adding model 'MailingListSegment'
+        db.create_table('emencia_mailinglistsegment', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('mailing_list', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['emencia.MailingList'])),
+        ))
+        db.send_create_signal('emencia', ['MailingListSegment'])
+
+        # Adding M2M table for field subscribers on 'MailingListSegment'
+        db.create_table('emencia_mailinglistsegment_subscribers', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('mailinglistsegment', models.ForeignKey(orm['emencia.mailinglistsegment'], null=False)),
+            ('contact', models.ForeignKey(orm['emencia.contact'], null=False))
+        ))
+        db.create_unique('emencia_mailinglistsegment_subscribers', ['mailinglistsegment_id', 'contact_id'])
 
 
     def backwards(self, orm):
-        # Deleting field 'Contact.verified'
-        db.delete_column('emencia_contact', 'verified')
+        # Deleting model 'MailingListSegment'
+        db.delete_table('emencia_mailinglistsegment')
+
+        # Removing M2M table for field subscribers on 'MailingListSegment'
+        db.delete_table('emencia_mailinglistsegment_subscribers')
 
 
     models = {
@@ -48,18 +62,16 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'emencia.contact': {
-            'Meta': {'ordering': "('creation_date',)", 'unique_together': "(('email', 'owner'),)", 'object_name': 'Contact'},
+            'Meta': {'ordering': "('creation_date',)", 'object_name': 'Contact'},
             'creation_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75'}),
+            'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'owner': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'subscriber': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'tester': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'verified': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
+            'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
         },
         'emencia.contactmailingstatus': {
             'Meta': {'ordering': "('-creation_date',)", 'object_name': 'ContactMailingStatus'},
@@ -84,16 +96,14 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modification_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'mailinglist_subscriber'", 'symmetrical': 'False', 'to': "orm['emencia.Contact']"}),
             'unsubscribers': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'mailinglist_unsubscriber'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['emencia.Contact']"})
         },
         'emencia.mailinglistsegment': {
-            'Meta': {'ordering': "('position',)", 'object_name': 'MailingListSegment'},
+            'Meta': {'object_name': 'MailingListSegment'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mailing_list': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'segments'", 'to': "orm['emencia.MailingList']"}),
+            'mailing_list': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.MailingList']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'position': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['emencia.Contact']", 'symmetrical': 'False'})
         },
         'emencia.newsletter': {
@@ -125,12 +135,6 @@ class Migration(SchemaMigration):
             'port': ('django.db.models.fields.IntegerField', [], {'default': '25'}),
             'tls': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'user': ('django.db.models.fields.CharField', [], {'max_length': '128', 'blank': 'True'})
-        },
-        'emencia.subscriberverification': {
-            'Meta': {'object_name': 'SubscriberVerification'},
-            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['emencia.Contact']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'link_id': ('uuidfield.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'blank': 'True'})
         },
         'emencia.workgroup': {
             'Meta': {'object_name': 'WorkGroup'},
