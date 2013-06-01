@@ -42,4 +42,5 @@ setup(name='emencia',
                         'django-filebrowser-no-grappelli',
                         'django-tinymce',
                         'django-uuidfield',
+                        'South==0.8.1',
                         'django-autoslug==1.6.1'])
