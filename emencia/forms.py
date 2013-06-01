@@ -25,8 +25,7 @@ class MailingListSubscriptionForm(forms.ModelForm):
         contact, created = Contact.objects.get_or_create(
             email=data['email'],
             defaults={
-                'first_name': data['first_name'],
-                'last_name': data['last_name']
+                'full_name': data['full_name'],
             }
         )
 
@@ -35,7 +34,7 @@ class MailingListSubscriptionForm(forms.ModelForm):
 
     class Meta:
         model = Contact
-        fields = ('first_name', 'last_name')
+        fields = ('full_name',)
         exclude = ('email',)
 
 
@@ -55,7 +54,7 @@ class AllMailingListSubscriptionForm(MailingListSubscriptionForm):
         data = self.cleaned_data
         contact, created = Contact.objects.get_or_create(
             email=data['email'],
-            defaults={'first_name': data['first_name'], 'last_name': data['last_name']}
+            defaults={'full_name': data['full_name']}
         )
 
         for mailing_list in data['mailing_lists']:

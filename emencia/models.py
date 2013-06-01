@@ -154,8 +154,7 @@ class Contact(models.Model):
 
     email = models.EmailField(_('email'), unique=True)
     verified = models.BooleanField('verified', default=False)
-    first_name = models.CharField(_('first name'), max_length=50, blank=True)
-    last_name = models.CharField(_('last name'), max_length=50, blank=True)
+    full_name = models.CharField(_('full name'), max_length=255, null=True, blank=True)
 
     subscriber = models.BooleanField(_('subscriber'), default=True)
     valid = models.BooleanField(_('valid email'), default=True)
@@ -178,13 +177,9 @@ class Contact(models.Model):
         return vcard_contact_export(self)
 
     def mail_format(self):
-        if self.first_name and self.last_name:
-            # return '%s %s <%s>' % (self.first_name, self.last_name, self.email)
-            # Applying cdchen's fix -
-            # https://github.com/cdchen/emencia-django-newsletter/commit/bd98653d92a442be2fdd044c6d8c59ab00a5bc7d
-            return '"%s %s" <%s>' % (
-                unicode(self.last_name).encode('utf-8'),
-                unicode(self.first_name).encode('utf-8'),
+        if self.full_name:
+            return '"%s" <%s>' % (
+                unicode(self.full_name).encode('utf-8'),
                 unicode(self.email).encode('utf-8')
             )
         return self.email
@@ -195,8 +190,8 @@ class Contact(models.Model):
         return reverse(urlname, args=[self.pk])
 
     def __unicode__(self):
-        if self.first_name and self.last_name:
-            contact_name = '%s %s' % (self.last_name, self.first_name)
+        if self.full_name:
+            contact_name = self.full_name
         else:
             contact_name = self.email
         return contact_name

@@ -31,13 +31,13 @@ contacts_imported = Signal(providing_args=['source', 'type'])
 class ContactAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
     list_display = (
-        'verified', 'email', 'first_name', 'last_name', 'tester', 'subscriber', 'valid', 'total_subscriptions',
+        'full_name', 'email', 'verified', 'tester', 'subscriber', 'valid', 'total_subscriptions',
         'creation_date'
     )
     list_filter = ('subscriber', 'valid', 'tester', 'creation_date', 'modification_date')
-    search_fields = ('email', 'first_name', 'last_name')
+    search_fields = ('email', 'full_name')
     fieldsets = (
-        (None, {'fields': ('email', 'first_name', 'last_name')}),
+        (None, {'fields': ('email', 'full_name')}),
         (_('Status'), {'fields': ('verified', 'subscriber', 'valid', 'tester')}),
     )
     actions = ['create_mailinglist', 'export_vcard', 'export_excel']

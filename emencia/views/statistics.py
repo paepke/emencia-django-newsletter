@@ -82,8 +82,7 @@ def view_newsletter_report(request, slug):
     def header_line(links):
         link_cols = [smart_str(link.title) for link in links]
         return [
-            smart_str(_('first name')),
-            smart_str(_('last name')),
+            smart_str(_('full name')),
             smart_str(_('email')),
             smart_str(_('openings'))
         ] + link_cols
@@ -98,8 +97,7 @@ def view_newsletter_report(request, slug):
             Q(status=ContactMailingStatus.OPENED) | Q(status=ContactMailingStatus.OPENED_ON_SITE)
         ).count()
         return [
-           smart_str(contact.first_name),
-           smart_str(contact.last_name),
+           smart_str(contact.full_name),
            smart_str(contact.email),
            openings
         ] + link_cols

@@ -128,16 +128,16 @@ class ContactTestCase(TestCase):
     def test_mail_format(self):
         contact = Contact(email='test@domain.com')
         self.assertEquals(contact.mail_format(), 'test@domain.com')
-        contact = Contact(email='test@domain.com', first_name='Toto')
-        self.assertEquals(contact.mail_format(), 'test@domain.com')
-        contact = Contact(email='test@domain.com', first_name='Toto', last_name='Titi')
+        contact = Contact(email='test@domain.com', full_name='Toto')
+        self.assertEquals(contact.mail_format(), 'Toto <test@domain.com>')
+        contact = Contact(email='test@domain.com', full_name='Toto Titi')
         self.assertEquals(contact.mail_format(), 'Titi Toto <test@domain.com>')
 
     def test_vcard_format(self):
-        contact = Contact(email='test@domain.com', first_name='Toto', last_name='Titi')
+        contact = Contact(email='test@domain.com', full_name='Toto Titi')
         self.assertEquals(contact.vcard_format(), 'BEGIN:VCARD\r\nVERSION:3.0\r\n' \
                                                   'EMAIL;TYPE=INTERNET:test@domain.com\r\nFN:Toto Titi\r\n' \
-                                                  'N:Titi;Toto;;;\r\nEND:VCARD\r\n')
+                                                  'N:Titi Toto;;;\r\nEND:VCARD\r\n')
 
     def test_subscriptions(self):
         contact = Contact.objects.create(email='test@domain.com')
