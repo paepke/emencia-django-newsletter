@@ -216,7 +216,7 @@ class MailingList(models.Model):
 
     subscribers = models.ManyToManyField(
         Contact, verbose_name=_('subscribers'),
-        related_name='mailinglist_subscriber'
+        related_name='mailinglist_subscriber', null=True, blank=True
     )
     unsubscribers = models.ManyToManyField(
         Contact, verbose_name=_('unsubscribers'),
