@@ -95,7 +95,7 @@ For the latest stable version use easy_install ::
 Applications
 ------------
 
-Then register **emencia.django.newsletter**, **admin**, **contenttypes** and **tagging** in the INSTALLED_APPS section of your project's settings. ::
+Then register **emencia**, **south**, **admin** and **contenttypes** in the INSTALLED_APPS section of your project's settings. ::
 
   INSTALLED_APPS = (
     # Your favorites apps
@@ -103,8 +103,8 @@ Then register **emencia.django.newsletter**, **admin**, **contenttypes** and **t
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.sessions',
-    'tagging',
-    'emencia.django.newsletter',)
+    'emencia',
+    'south',)
 
 
 Urls
@@ -112,14 +112,14 @@ Urls
 
 In your project urls.py adding this following line to include the newsletter's urls for serving the newsletters in HTML. ::
 
-  url(r'^newsletters/', include('emencia.django.newsletter.urls')),
+  url(r'^newsletters/', include('emencia.urls')),
 
 Note this urlset is provided for convenient usage, but you can do something like that if you want to customize your urls : ::
 
-  url(r'^newsletters/', include('emencia.django.newsletter.urls.newsletter')),
-  url(r'^mailing/', include('emencia.django.newsletter.urls.mailing_list')),
-  url(r'^tracking/', include('emencia.django.newsletter.urls.tracking')),
-  url(r'^statistics/', include('emencia.django.newsletter.urls.statistics')),
+  url(r'^newsletters/', include('emencia.urls.newsletter')),
+  url(r'^mailing/', include('emencia.urls.mailing_list')),
+  url(r'^tracking/', include('emencia.urls.tracking')),
+  url(r'^statistics/', include('emencia.urls.statistics')),
 
 Media Files
 -----------
