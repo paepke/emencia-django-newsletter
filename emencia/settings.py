@@ -48,3 +48,10 @@ USE_CKEDITOR = getattr(settings, 'NEWSLETTER_USE_CKEDITOR', 'ckeditor' in settin
 USE_TINYMCE = getattr(settings, 'NEWSLETTER_USE_TINYMCE', 'tinymce' in settings.INSTALLED_APPS)
 TINYMCE_WIDGET_ATTRS = getattr(settings, 'TINYMCE_WIDGET_ATTRS', {'cols': 150, 'rows': 80})
 NEWSLETTER_TINYMCE_TEMPLATE_DIR = getattr(settings, 'NEWSLETTER_TINYMCE_TEMPLATE_DIR', 'upload/tinymce/templates/')
+
+# Should a user be automatically subscribed to a mailing list if it's
+# the only list in system?
+AUTO_SUBSCRIBE_TO_ONLY_LIST = getattr(settings, 'NEWSLETTER_AUTO_SUBSCRIBE_TO_ONLY_LIST', True)
+
+# To which mailing list(s) should a new user be automatically subscribed?
+AUTO_SUBSCRIBE_LIST_NAME = getattr(settings, 'NEWSLETTER_AUTO_SUBSCRIBE_LIST_NAME', None)

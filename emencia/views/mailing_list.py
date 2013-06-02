@@ -22,6 +22,8 @@ from emencia.models import SMTPServer
 from emencia.models import SubscriberVerification
 from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import UNSUBSCRIBE_ALL
+from emencia.settings import AUTO_SUBSCRIBE_TO_ONLY_LIST
+from emencia.settings import AUTO_SUBSCRIBE_LIST_NAME
 from emencia.utils.tokens import untokenize
 
 from StringIO import StringIO
@@ -51,7 +53,6 @@ def view_mailinglist_unsubscribe(request, slug, uidb36, token):
 
             if not already_unsubscribed:
                 mailing_list.unsubscribers.add(contact)
-                mailing_list.save()
             unsubscribed += 1
 
     if unsubscribed > 0:
@@ -185,11 +186,25 @@ def view_uuid_verification(request, link_id, form_class=None):
         context['uuid_exist'] = True
         subscription['contact'] = subscription['object'].contact
         ready = True
-        # Can't see what this is about...
-        # if context['mailing_list_count'] == 1:
-        #     mailing_list = mailinglists.get().subscribers.add(
-        #         subscription['contact'].id
-        #     )
+
+        # If there is only one mailing list, subscribe the (now)
+        # verified user to it
+        if AUTO_SUBSCRIBE_TO_ONLY_LIST:
+            if context['mailing_list_count'] == 1:
+                mailing_list = mailinglists.get()
+                mailing_list.subscribers.add(subscription['contact'].id)
+                mailing_list.unsubscribers.remove(subscription['contact'].id)
+
+        if AUTO_SUBSCRIBE_LIST_NAME is not None:
+            if isinstance(AUTO_SUBSCRIBE_LIST_NAME, basestring):
+                lists = [AUTO_SUBSCRIBE_LIST_NAME]
+            else:
+                lists = AUTO_SUBSCRIBE_LIST_NAME
+
+            mls = mailinglists.filter(name__in=lists)
+            for ml in mls:
+                ml.subscribers.add(subscription['contact'].id)
+                ml.unsubscribers.remove(subscription['contact'].id)
 
         if request.POST:
             form = form_class(request.POST)
