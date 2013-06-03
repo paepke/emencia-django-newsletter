@@ -1,4 +1,3 @@
-=================
 A word of warning
 =================
 
@@ -13,7 +12,6 @@ re-applied the patches he selected.
 revisions!** It's possible I'd change migrations retroactively,
 reorder them, etc. If you want to use this code, please contact me!
 
-------------------
 Future development
 ------------------
 
@@ -23,7 +21,6 @@ discussing taking over the maintenance from Emencia, in case they find
 this acceptable. If not, we'll probably have to proper fork and rename
 this project.
 
------------------------------------
 Changelog since @marshalc's version
 -----------------------------------
 
@@ -35,7 +32,6 @@ Changelog since @marshalc's version
 * Enabled and extended automatical subscription to mailing lists
 * General cleanup
 
------
 TODOs
 -----
 
@@ -49,7 +45,7 @@ TODOs
   back to Emencia easier.
 * Subscriber verification should be more obvious
 * Extend templating
-* Make overriding default templates possible
+* Make overriding default 4templates possible
 
 
 And now, for the original documentation
