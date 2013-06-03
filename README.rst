@@ -31,6 +31,7 @@ Changelog since @marshalc's version
 * Merged Contact.first_name and Contact.last_name to Contact.full_name
 * Enabled and extended automatical subscription to mailing lists
 * General cleanup
+* Converted verification mail to template
 
 TODOs
 -----

@@ -3,7 +3,9 @@ Views for emencia Mailing List and Subscriber Verification
 """
 import re
 
+from django.template import Context, Template
 from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
@@ -132,19 +134,22 @@ def view_subscriber_verification(request, form_class):
             server = SMTPServer.objects.get(id=1)  # TODO: Fix this assumption that the first smtp is id 1
             smtp = server.connect()
 
-            message = _('Thanks for subscription, please click the following link to verify your email address.')
+            message = _()
             from_mail = DEFAULT_HEADER_REPLY
             to_mail = context['form'].instance.email
 
-            # TODO: Make this more neatly tied to the urls config
-            link = 'http://{0}/newsletters/mailing/{1}'.format(str(request.get_host()), str(link_id))
-            content_html = u'<body><p>{0!s}</p><p><a href="{1}">{2}</a></p></body>'.format(
-                message, link, _('verify link'))
+            mail_context = Context({
+                'base_url': "%s://%s" % ("https" if request.is_secure() else "http", request.get_host()),
+                'link_id': link_id,
+            })
+
+            content_html = render_to_string('newsletter/newsletter_mail_verification.html', mail_context)
+
             content_text = html2text(content_html)
 
             message = MIMEMultipart()
 
-            message['Subject'] = _('Subscriber verification')
+            message['Subject'] = render_to_string('newsletter/newsletter_mail_verification_subject.html', context)
             message['From'] = smart_str(DEFAULT_HEADER_REPLY)
             message['Reply-to'] = smart_str(DEFAULT_HEADER_REPLY)
             message['To'] = smart_str(context['form'].instance.email)
