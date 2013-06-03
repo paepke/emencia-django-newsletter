@@ -1,3 +1,59 @@
+=================
+A word of warning
+=================
+
+This fork is an attempt to clean up, in part rewrite and extend the
+original **emencia-django-newsletter** with patches available in
+multiple forks on GitHub and some original work. Currently, I'm
+extending the project for my needs, trying to be as generic as
+possible. I've originally started with @marshalc's fork and
+re-applied the patches he selected.
+
+**This code currently provides no proper upgrade path between
+revisions!** It's possible I'd change migrations retroactively,
+reorder them, etc. If you want to use this code, please contact me!
+
+------------------
+Future development
+------------------
+
+Since original repository seems to be dormant and still several people
+are interested in **emencia-django-newsletter**, we'll certainly be
+discussing taking over the maintenance from Emencia, in case they find
+this acceptable. If not, we'll probably have to proper fork and rename
+this project.
+
+-----------------------------------
+Changelog since @marshalc's version
+-----------------------------------
+
+* Restored migrations
+* Added missing dependencies, thrown out unnecessary ones
+* Reverted Contact.owner field (based on discussion with original author)
+* Changed slug handling to AutoSlugField
+* Merged Contact.first_name and Contact.last_name to Contact.full_name
+* Enabled and extended automatical subscription to mailing lists
+* General cleanup
+
+-----
+TODOs
+-----
+
+* It might make sense to revert the namespace flattening. There was
+  little sense in that other than avoiding Django's incomplete
+  namespace package support and other than that, **emencia** is a
+  bigger project than just newsletters, which we don't own. Either we
+  are going to bring the original **emencia-django-newsletter** up to
+  speed or we'll need to rename, either way the namespace will change,
+  but having the project under the original name would make merging
+  back to Emencia easier.
+* Subscriber verification should be more obvious
+* Extend templating
+* Make overriding default templates possible
+
+
+And now, for the original documentation
+
 =========================
 Emencia Django Newsletter
 =========================
