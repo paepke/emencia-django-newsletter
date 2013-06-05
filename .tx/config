@@ -1,5 +1,5 @@
 [main]
-host = https://www.transifex.com
+host = http://www.transifex.com
 
 [emencia-django-newsletter-ng.djangopo]
 file_filter = emencia/locale/<lang>/LC_MESSAGES/django.po
