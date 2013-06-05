@@ -155,12 +155,17 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
     def duplicate(self, request, queryset):
         """Duplicate selected newsletters"""
         for newsletter in queryset:
+            attachments = newsletter.attachment_set.all()
             newsletter.pk = None
             i = 1
             while Newsletter.objects.filter(title=u'%s [%s]' % (newsletter.title, i)).count() > 0:
                 i += 1
             newsletter.title = u'%s [%s]' % (newsletter.title, i)
             newsletter.save()
+            for att in attachments:
+                att.pk = None
+                att.newsletter = newsletter
+                att.save()
 
 if USE_TINYMCE:
     from tinymce.widgets import TinyMCE
