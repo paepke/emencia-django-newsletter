@@ -2,35 +2,18 @@
 Views for emencia Mailing List and Subscriber Verification
 """
 import re
-
-from django.template import Context, Template
-from django.template import RequestContext
-from django.template.loader import render_to_string
-from django.shortcuts import get_object_or_404, render_to_response
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.encoders import encode_base64
-from email.mime.audio import MIMEAudio
-from email.mime.base import MIMEBase
-from email.mime.image import MIMEImage
-
-from emencia.models import Newsletter
-from emencia.models import MailingList
-from emencia.models import ContactMailingStatus
-from emencia.models import SMTPServer
-from emencia.models import SubscriberVerification
-from emencia.settings import DEFAULT_HEADER_REPLY
-from emencia.settings import UNSUBSCRIBE_ALL
-from emencia.settings import AUTO_SUBSCRIBE_TO_ONLY_LIST
-from emencia.settings import AUTO_SUBSCRIBE_LIST_NAME
-from emencia.utils.tokens import untokenize
-
 from StringIO import StringIO
 
+from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template import Context, RequestContext
+from django.template.loader import render_to_string
+from django.utils.encoding import smart_str
 from html2text import html2text as html2text_orig
+
+from emencia.models import Newsletter, MailingList, ContactMailingStatus, SubscriberVerification
+from emencia.settings import DEFAULT_HEADER_REPLY, UNSUBSCRIBE_ALL, AUTO_SUBSCRIBE_TO_ONLY_LIST, AUTO_SUBSCRIBE_LIST_NAME
+from emencia.utils.tokens import untokenize
 
 
 def view_mailinglist_unsubscribe(request, slug, uidb36, token):
@@ -123,20 +106,13 @@ def view_subscriber_verification(request, form_class):
 
     if request.POST:
         context['form'] = form_class(request.POST)
-        subscription = SubscriberVerification()
         if context['form'].is_valid():
-            contact = context['form'].save()
-
+            subscription = SubscriberVerification()
+            contact = context['form'].save()                
             subscription.contact = context['form'].instance
             subscription.save()
-            link_id = subscription.link_id
 
-            server = SMTPServer.objects.get(id=1)  # TODO: Fix this assumption that the first smtp is id 1
-            smtp = server.connect()
-
-            message = _()
-            from_mail = DEFAULT_HEADER_REPLY
-            to_mail = context['form'].instance.email
+            link_id = str(subscription.link_id)
 
             mail_context = Context({
                 'base_url': "%s://%s" % ("https" if request.is_secure() else "http", request.get_host()),
@@ -147,23 +123,20 @@ def view_subscriber_verification(request, form_class):
 
             content_text = html2text(content_html)
 
-            message = MIMEMultipart()
+            message = EmailMultiAlternatives()
+            message.from_email = smart_str(DEFAULT_HEADER_REPLY)
+            message.extra_headers = {'Reply-to': smart_str(DEFAULT_HEADER_REPLY)}
+            message.to = [smart_str(context['form'].instance.email)]
+            
+            message.subject = render_to_string('newsletter/newsletter_mail_verification_subject.html', context)
 
-            message['Subject'] = render_to_string('newsletter/newsletter_mail_verification_subject.html', context)
-            message['From'] = smart_str(DEFAULT_HEADER_REPLY)
-            message['Reply-to'] = smart_str(DEFAULT_HEADER_REPLY)
-            message['To'] = smart_str(context['form'].instance.email)
-
-            message_alt = MIMEMultipart('alternative')
-            message_alt.attach(MIMEText(smart_str(content_text), 'plain', 'UTF-8'))
-            message_alt.attach(MIMEText(smart_str(content_html), 'html', 'UTF-8'))
-            message.attach(message_alt)
+            message.body = smart_str(content_text)
+            message.attach_alternative(smart_str(content_html), "text/html")       
 
             try:
-                smtp.sendmail(from_mail, to_mail, message.as_string())
+                message.send()
             except Exception, e:
                 print e
-            smtp.quit()
 
             context['send'] = True
 

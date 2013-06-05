@@ -1,7 +1,6 @@
 """Settings for emencia"""
 import string
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 # Tracking related settings
 BASE64_IMAGES = {
@@ -19,13 +18,6 @@ USE_UTM_TAGS = getattr(settings, 'NEWSLETTER_USE_UTM_TAGS', True)
 # Email header defaults
 DEFAULT_HEADER_SENDER = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_SENDER', 'Emencia Newsletter<noreply@example.com>')
 DEFAULT_HEADER_REPLY = getattr(settings, 'NEWSLETTER_DEFAULT_HEADER_REPLY', DEFAULT_HEADER_SENDER)
-
-# Used to set a default limit on the SMTP Model sender
-MAILER_HARD_LIMIT = getattr(settings, 'NEWSLETTER_MAILER_HARD_LIMIT', 10000)
-
-# Used by the Mailer function to regulate the rate of sending and retries
-SLEEP_BETWEEN_SENDING = getattr(settings, 'NEWSLETTER_SLEEP_BETWEEN_SENDING', 0)
-RESTART_CONNECTION_BETWEEN_SENDING = getattr(settings, 'NEWSLETTER_RESTART_CONNECTION_BETWEEN_SENDING', False)
 
 # Still not sure what this does... TODO: Investigate this function!
 USE_WORKGROUPS = getattr(settings, 'NEWSLETTER_USE_WORKGROUPS', False)

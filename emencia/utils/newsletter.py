@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 
 from django.core.urlresolvers import reverse
 
-from emencia.models import Link
 from emencia.settings import TRACKING_IGNORE_ANCHOR
 from emencia.settings import USE_PRETTIFY
 

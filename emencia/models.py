@@ -1,153 +1,43 @@
 """
 Models for emencia
 """
-from uuidfield import UUIDField
-
+import logging
+import mimetypes
 from datetime import datetime
-from datetime import timedelta
-
-from django.contrib.auth.models import Group
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
-from django.db import models
-from django.utils.encoding import force_unicode
-from django.utils.encoding import smart_str
-from django.utils.translation import ugettext_lazy as _
-
-from autoslug import AutoSlugField
-
-from emencia.managers import ContactManager
-from emencia.settings import BASE_PATH
-from emencia.settings import MAILER_HARD_LIMIT
-from emencia.settings import DEFAULT_HEADER_REPLY
-from emencia.settings import DEFAULT_HEADER_SENDER
-from emencia.utils.vcard import vcard_contact_export
-from emencia.utils.template import get_templates
-
-from premailer import transform
-
-from smtplib import SMTP
-from smtplib import SMTP_SSL
-from smtplib import SMTPHeloError
-
-from tagging.fields import TagField
-
+from email import message_from_file
+from email.encoders import encode_base64
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.text import MIMEText
+from random import sample
+from smtplib import SMTPRecipientsRefused
 from urllib2 import urlopen
 
-# Patch for Python < 2.6
-try:
-    getattr(SMTP, 'ehlo_or_helo_if_needed')
-except AttributeError:
-    def ehlo_or_helo_if_needed(self):
-        if self.helo_resp is None and self.ehlo_resp is None:
-            if not (200 <= self.ehlo()[0] <= 299):
-                (code, resp) = self.helo()
-                if not (200 <= code <= 299):
-                    raise SMTPHeloError(code, resp)
-    SMTP.ehlo_or_helo_if_needed = ehlo_or_helo_if_needed
+from autoslug import AutoSlugField
+from django.conf import settings
+from django.contrib.auth.models import Group
+from django.core.mail import EmailMultiAlternatives
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.template import Context, Template
+from django.utils.encoding import force_unicode, smart_str, smart_unicode
+from django.utils.translation import ugettext_lazy as _
+from premailer import Premailer, transform
+from uuidfield import UUIDField
+
+from django.template.loader import render_to_string
+from django.template.loader import get_template
 
 
-class SMTPServer(models.Model):
-    """
-    Configuration of a SMTP server
-    """
-    name = models.CharField(_('name'), max_length=255)
-    host = models.CharField(_('server host'), max_length=255)
-    user = models.CharField(
-        _('server user'),
-        max_length=128,
-        blank=True,
-        help_text=_('Leave empty if the host is public.')
-    )
-    password = models.CharField(
-        _('server password'),
-        max_length=128,
-        blank=True,
-        help_text=_('Leave empty if the host is public.')
-    )
-    port = models.IntegerField(_('server port'), default=25)
-    tls = models.BooleanField(_('server use TLS'))
+from emencia.managers import ContactManager
+from emencia.settings import BASE_PATH, INCLUDE_UNSUBSCRIPTION, TRACKING_LINKS, TRACKING_IMAGE, TRACKING_IMAGE_FORMAT, UNIQUE_KEY_LENGTH, UNIQUE_KEY_CHAR_SET
+from emencia.utils import html2text
+from emencia.utils.template import get_templates
+from emencia.utils.vcard import vcard_contact_export
 
-    headers = models.TextField(
-        _('custom headers'),
-        blank=True,
-        help_text=_(
-            'key1: value1 key2: value2, split by return line.\n'\
-            'Useful for passing some tracking headers if your provider allows it.'
-        )
-    )
-    mails_hour = models.IntegerField(
-        _('e-mail send rate'),
-        help_text=_("E-Mail sending rate in messages per hour"),
-        default=0
-    )
-    emails_remains = models.IntegerField(
-        _('remaining e-mail'),
-        help_text=_("Sendable E-Mail in the current account"),
-        default=MAILER_HARD_LIMIT
-    )
 
-    def connect(self):
-        """Connect the SMTP Server"""
-        # Modified: https://github.com/YuChem/emencia-django-newsletter/commit/492f3d58b82e35a1e042c8425352ae533da6ac76
-        if self.port == 465:
-            smtp = SMTP_SSL(smart_str(self.host), int(self.port))
-        else:
-            smtp = SMTP(smart_str(self.host), int(self.port))
-            smtp.ehlo_or_helo_if_needed()
-
-            if self.tls:
-                smtp.starttls()
-
-        smtp.ehlo_or_helo_if_needed()
-
-        if self.user or self.password:
-            smtp.login(smart_str(self.user), smart_str(self.password))
-        return smtp
-
-    def delay(self):
-        """
-        compute the delay (in seconds) between mails to ensure mails per hour limit is not reached
-
-        :rtype: float
-        """
-        if not self.mails_hour:
-            return 0.0
-        else:
-            return 3600.0 / self.mails_hour
-
-    def credits(self):
-        """Return how many mails the server can send"""
-        if not self.mails_hour:
-            return self.emails_remains
-
-        last_hour = datetime.now() - timedelta(hours=1)
-        sent_last_hour = ContactMailingStatus.objects.filter(
-            models.Q(status=ContactMailingStatus.SENT) |
-            models.Q(status=ContactMailingStatus.SENT_TEST),
-            newsletter__server=self,
-            creation_date__gte=last_hour).count()
-        return self.mails_hour - sent_last_hour
-
-    @property
-    def custom_headers(self):
-        if self.headers:
-            headers = {}
-            for header in self.headers.splitlines():
-                if header:
-                    key, value = header.split(':')
-                    headers[key.strip()] = value.strip()
-            return headers
-        return {}
-
-    def __unicode__(self):
-        return '%s (%s)' % (self.name, self.host)
-
-    class Meta:
-        verbose_name = _('SMTP server')
-        verbose_name_plural = _('SMTP servers')
-
+logger = logging.getLogger(__name__)
 
 class Contact(models.Model):
     """Contact for emailing"""
@@ -200,6 +90,45 @@ class Contact(models.Model):
         ordering = ('creation_date',)
         verbose_name = _('contact')
         verbose_name_plural = _('contacts')
+
+
+class ContactMailingStatus(models.Model):
+    """Status of the reception"""
+    SENT_TEST = -1
+    SENT = 0
+    ERROR = 1
+    INVALID = 2
+    OPENED = 4
+    OPENED_ON_SITE = 5
+    LINK_OPENED = 6
+    UNSUBSCRIPTION = 7
+
+    STATUS_CHOICES = (
+        (SENT_TEST, _('sent in test')),
+        (SENT, _('sent')),
+        (ERROR, _('error')),
+        (INVALID, _('invalid email')),
+        (OPENED, _('opened')),
+        (OPENED_ON_SITE, _('opened on site')),
+        (LINK_OPENED, _('link opened')),
+        (UNSUBSCRIPTION, _('unsubscription')),
+    )
+
+    newsletter = models.ForeignKey('Newsletter', verbose_name=_('newsletter'))
+    contact = models.ForeignKey('Contact', verbose_name=_('contact'))
+    status = models.IntegerField(_('status'), choices=STATUS_CHOICES)
+    link = models.ForeignKey('Link', verbose_name=_('link'), blank=True, null=True)
+
+    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
+
+    def __unicode__(self):
+        return '%s : %s : %s' % (self.newsletter.__unicode__(), self.contact.__unicode__(), self.get_status_display())
+
+    class Meta:
+        ordering = ('-creation_date',)
+        verbose_name = _('contact mailing status')
+        verbose_name_plural = _('contact mailing statuses')
+
 
 
 class MailingList(models.Model):
@@ -294,8 +223,6 @@ class Newsletter(models.Model):
     mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'), null=True)
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
 
-    server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
-
     header_sender = models.CharField(_('sender'), max_length=255)
     header_reply = models.CharField(_('reply to'), max_length=255)
 
@@ -331,10 +258,186 @@ class Newsletter(models.Model):
     def __unicode__(self):
         return self.title
 
+    def __init__(self, *args, **kwargs):
+        self._attachments_done = False
+        self._attachments = []
+        super(Newsletter, self).__init__(*args, **kwargs)
+
     def save(self, *args, **kwargs):
+        self._attachments_done = False
         if self.content.startswith('http://'):
             self.content = transform(urlopen(self.content.strip()).read())
         super(Newsletter, self).save(*args, **kwargs)
+
+    @property
+    def can_send(self):
+        """Check if the newsletter should be sent out"""
+        try:
+            if settings.USE_TZ:
+                from django.utils.timezone import utc
+                now = datetime.utcnow().replace(tzinfo=utc)
+            else:
+                now = datetime.now()
+        except:
+            now = datetime.now()
+
+        if self.sending_date <= now and \
+               (self.status == Newsletter.WAITING or \
+                self.status == Newsletter.SENDING):
+            return True
+
+        return False
+
+    @property
+    def attachments(self):
+        if not self._attachments_done:            
+            self._attachments = []
+            for attachment in self.attachment_set.all():
+                ctype, encoding = mimetypes.guess_type(attachment.file_attachment.path)
+
+                if ctype is None or encoding is not None:
+                    ctype = 'application/octet-stream'
+
+                maintype, subtype = ctype.split('/', 1)
+
+                fd = open(attachment.file_attachment.path, 'rb')
+                if maintype == 'text':
+                    message_attachment = MIMEText(fd.read(), _subtype=subtype)
+                elif maintype == 'message':
+                    message_attachment = message_from_file(fd)
+                elif maintype == 'image':
+                    message_attachment = MIMEImage(fd.read(), _subtype=subtype)
+                elif maintype == 'audio':
+                    message_attachment = MIMEAudio(fd.read(), _subtype=subtype)
+                else:
+                    message_attachment = MIMEBase(maintype, subtype)
+                    message_attachment.set_payload(fd.read())
+                    encode_base64(message_attachment)
+                fd.close()
+
+                message_attachment.add_header('Content-Disposition', 'attachment', filename=attachment.title)
+                self._attachments.append(message_attachment)
+
+        return self._attachments
+
+    def update_newsletter_status(self):        
+        if self.status == Newsletter.WAITING:
+            self.status = Newsletter.SENDING
+        if self.status == Newsletter.SENDING and self.mails_sent() >= \
+               self.mailing_list.expedition_set().count():
+            self.status = Newsletter.SENT
+        self.save()
+
+    def prepare_message(self, contact):
+
+        from emencia.utils.tokens import tokenize
+        from emencia.utils.newsletter import fix_tinymce_links
+
+        uidb36, token = tokenize(contact)
+
+        base_url = self.base_url
+
+        context = Context({
+            'contact': contact,
+            'base_url': base_url,
+            'newsletter': self,
+            'tracking_image_format': TRACKING_IMAGE_FORMAT,
+            'uidb36': uidb36,
+            'token': token,
+            'UNIQUE_KEY': ''.join(sample(UNIQUE_KEY_CHAR_SET, UNIQUE_KEY_LENGTH))
+        })
+
+        message = EmailMultiAlternatives()
+        message.from_email = smart_str(self.header_sender)
+        message.extra_headers = {'Reply-to': smart_str(self.header_reply)}
+        message.to = [contact.mail_format()]
+
+        # Render only the message provided by the user with the WYSIWYG editor
+        message_template = Template(fix_tinymce_links(self.content))
+        message_content = message_template.render(context)
+
+        context.update({'message': message_content})
+
+        # link_site_exist = False
+        link_site = render_to_string('newsletter/newsletter_link_site.html', context)
+        context.update({'link_site': link_site})
+
+        if INCLUDE_UNSUBSCRIPTION:
+            unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
+            context.update({'unsubscription': unsubscription})
+
+        if TRACKING_IMAGE:
+            image_tracking = render_to_string('newsletter/newsletter_image_tracking.html', context)
+            context.update({'image_tracking': image_tracking})
+
+        content_template = get_template('mailtemplates/{0}/{1}'.format(self.template, 'index.html'))
+        content = content_template.render(context)
+
+        if TRACKING_LINKS:
+            from emencia.utils.newsletter import track_links
+            content = track_links(content, context)
+
+        content = smart_unicode(content)
+
+        p = Premailer(content, base_url=base_url, preserve_internal_links=True)
+        content = p.transform()
+
+        # newsletter_template = Template(self.content) 
+
+        message.body = html2text(content)
+        message.attach_alternative(smart_str(content), "text/html")
+        
+        title_template = Template(self.title)
+        title = title_template.render(context)
+        message.subject = title
+        
+        for attachment in self.attachments:
+            message.attach(attachment)
+
+        return message
+
+
+    def update_contact_status(self, contact, state):
+        if state == ContactMailingStatus.INVALID:
+            contact.valid = False
+            contact.save()
+
+        ContactMailingStatus.objects.get_or_create(newsletter=self, contact=contact, defaults={'status': state})
+
+    @property
+    def recipients(self):
+        already_sent = ContactMailingStatus.objects.filter(
+            status=ContactMailingStatus.SENT, newsletter=self
+        ).values_list('contact__id', flat=True)
+        expedition_list = self.mailing_list.expedition_set().exclude(id__in=already_sent)
+        return expedition_list
+
+    def send(self, recipients, force_now=False):
+        if not self.can_send and not force_now:
+            return
+
+        number_of_recipients = len(recipients)
+
+        logger.debug('%i emails will be sent' % number_of_recipients)
+
+        i = 1
+        for contact in recipients:
+            if not contact.verified:
+                logger.warn('- E-mail address not verified, not sending: {0}'.format(contact.email))
+                continue
+
+            logger.debug('- Processing %s/%s (%s)', i, number_of_recipients, contact.pk)
+
+            try:
+                message = self.prepare_message(contact)
+                message.send()
+                self.update_contact_status(contact, ContactMailingStatus.SENT)
+            except SMTPRecipientsRefused:
+                self.update_contact_status(contact, ContactMailingStatus.INVALID)
+
+            i += 1
+
+        self.update_newsletter_status()
 
     class Meta:
         ordering = ('-creation_date',)
@@ -382,45 +485,6 @@ class Attachment(models.Model):
 
     def get_absolute_url(self):
         return self.file_attachment.url
-
-
-class ContactMailingStatus(models.Model):
-    """Status of the reception"""
-    SENT_TEST = -1
-    SENT = 0
-    ERROR = 1
-    INVALID = 2
-    OPENED = 4
-    OPENED_ON_SITE = 5
-    LINK_OPENED = 6
-    UNSUBSCRIPTION = 7
-
-    STATUS_CHOICES = (
-        (SENT_TEST, _('sent in test')),
-        (SENT, _('sent')),
-        (ERROR, _('error')),
-        (INVALID, _('invalid email')),
-        (OPENED, _('opened')),
-        (OPENED_ON_SITE, _('opened on site')),
-        (LINK_OPENED, _('link opened')),
-        (UNSUBSCRIPTION, _('unsubscription')),
-    )
-
-    newsletter = models.ForeignKey(Newsletter, verbose_name=_('newsletter'))
-    contact = models.ForeignKey(Contact, verbose_name=_('contact'))
-    status = models.IntegerField(_('status'), choices=STATUS_CHOICES)
-    link = models.ForeignKey(Link, verbose_name=_('link'), blank=True, null=True)
-
-    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-
-    def __unicode__(self):
-        return '%s : %s : %s' % (self.newsletter.__unicode__(), self.contact.__unicode__(), self.get_status_display())
-
-    class Meta:
-        ordering = ('-creation_date',)
-        verbose_name = _('contact mailing status')
-        verbose_name_plural = _('contact mailing statuses')
-
 
 class WorkGroup(models.Model):
     """

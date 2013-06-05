@@ -12,7 +12,6 @@ from emencia.models import Contact
 from emencia.models import Newsletter
 from emencia.models import Attachment
 from emencia.models import MailingList
-from emencia.mailer import Mailer
 from emencia.settings import USE_TINYMCE, USE_CKEDITOR
 from emencia.settings import USE_WORKGROUPS
 from emencia.settings import DEFAULT_HEADER_SENDER
@@ -32,7 +31,7 @@ class AttachmentAdminInline(admin.TabularInline):
 
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('title', 'mailing_list', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',
+    list_display = ('title', 'mailing_list', 'status', 'sending_date', 'creation_date', 'modification_date',
                     'historic_link', 'statistics_link')
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'content', 'header_sender', 'header_reply')
@@ -41,7 +40,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         (None, {'fields': ('title', 'template', 'content', 'public',)}),
         (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
         (_('Sending'), {'fields': ('sending_date', 'status',)}),
-        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'base_url'), 'classes': ('collapse',)}),
+        (_('Miscellaneous'), {'fields': ('header_sender', 'header_reply', 'base_url'), 'classes': ('collapse',)}),
     )
     inlines = (AttachmentAdminInline,)
     actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'duplicate']
@@ -131,45 +130,25 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
     def send_mail_test(self, request, queryset):
         """Send newsletter in test"""
         for newsletter in queryset:
-            if newsletter.test_contacts.count():
-                mailer = Mailer(newsletter, test=True)
-                try:
-                    mailer.run()
-                except HTMLParseError:
-                    self.message_user(request, _('Unable send newsletter, due to errors within HTML.'))
-                    continue
-                self.message_user(request, _('%s succesfully sent.') % newsletter)
-            else:
-                self.message_user(request, _('No test contacts assigned for %s.') % newsletter)
+            try:
+                newsletter.send(newsletter.test_contacts.all(), force_now=True)
+            except HTMLParseError:
+                self.message_user(request, _('Unable send newsletter, due to errors within HTML.'))
+                continue
+            self.message_user(request, _('%s succesfully sent.') % newsletter)
     send_mail_test.short_description = _('Send test email')
 
     def make_ready_to_send(self, request, queryset):
         """Make newsletter ready to send"""
         from django.contrib import messages
-        queryset = queryset.filter(status=Newsletter.DRAFT)
-        emails_to_send = 0
-        sent_all = True
-        for newsletter in queryset:
-            emails_to_send += len(newsletter.mailing_list.expedition_set())
-            if emails_to_send > newsletter.server.emails_remains:
-                messages.warning(request, _('You do not have enough e-mail'))
-                sent_all = False
-                break
-            newsletter.status = Newsletter.WAITING
-            newsletter.server.emails_remains = newsletter.server.emails_remains - emails_to_send
-            newsletter.server.save()
-            newsletter.save()
-        if sent_all:
-            messages.success(request, _('%s newletters are ready to send') % queryset.count())
+        queryset.filter(status=Newsletter.DRAFT).update(status=Newsletter.WAITING)
+        messages.success(request, _('%s newletters are ready to send') % queryset.count())
         # self.message_user(request, message)
     make_ready_to_send.short_description = _('Make ready to send')
 
     def make_cancel_sending(self, request, queryset):
         """Cancel the sending of newsletters"""
-        queryset = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
-        for newsletter in queryset:
-            newsletter.status = Newsletter.CANCELED
-            newsletter.save()
+        queryset = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING)).update(status=Newsletter.CANCELED)
         self.message_user(request, _('%s newletters are cancelled') % queryset.count())
     make_cancel_sending.short_description = _('Cancel the sending')
 
