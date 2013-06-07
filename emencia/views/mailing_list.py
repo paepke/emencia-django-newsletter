@@ -35,10 +35,8 @@ def view_mailinglist_unsubscribe(request, slug, uidb36, token):
 
     if request.POST.get('email'):
         for mailing_list in mailing_lists:
-            already_unsubscribed = contact in mailing_list.unsubscribers.all()
-
-            if not already_unsubscribed:
-                mailing_list.unsubscribers.add(contact)
+            mailing_list.unsubscribers.add(contact)
+            mailing_list.subscribers.remove(contact)
             contact_unsubscribed.send(sender=contact, mailing_list=mailing_list)
             unsubscribed += 1
 
