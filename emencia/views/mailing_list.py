@@ -97,8 +97,8 @@ def html2text(html):
     out.write(txt[pos:])
     return out.getvalue()
 
+def _view_subscriber_verification_context(request, form_class):
 
-def view_subscriber_verification(request, form_class):
     """
     A simple view that shows a form for subscription for the newsletter.
     """
@@ -143,16 +143,20 @@ def view_subscriber_verification(request, form_class):
     else:
         context['form'] = form_class()
 
+    return context
+
+
+def view_subscriber_verification(request, form_class):
+
+    context = _view_subscriber_verification_context(request, form_class)
+    
     return render_to_response(
         'newsletter/subscriber_verification.html',
         context,
         context_instance=RequestContext(request)
     )
 
-def view_uuid_verification(request, link_id, form_class=None):
-    """
-    A simple view that shows if verification is true or false.
-    """
+def _view_uuid_verification_context(request, link_id, form_class=None):
     context = {}
     context['mailinglists'] = mailinglists = MailingList.objects.filter(public=True)
     context['mailing_list_count'] = mailinglists.count()
@@ -201,6 +205,15 @@ def view_uuid_verification(request, link_id, form_class=None):
 
     except SubscriberVerification.DoesNotExist:
         context['uuid_exist'] = False
+
+    return context
+
+def view_uuid_verification(request, link_id, form_class=None):
+    """
+    A simple view that shows if verification is true or false.
+    """
+
+    context = _view_uuid_verification_context(request, link_id, form_class)
 
     return render_to_response(
         'newsletter/uuid_verification.html',
