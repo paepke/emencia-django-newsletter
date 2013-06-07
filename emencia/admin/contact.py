@@ -34,7 +34,7 @@ class ContactAdmin(admin.ModelAdmin):
         'full_name', 'email', 'verified', 'tester', 'subscriber', 'valid', 'total_subscriptions',
         'creation_date'
     )
-    list_filter = ('subscriber', 'valid', 'tester', 'creation_date', 'modification_date')
+    list_filter = ('subscriber', 'valid', 'verified', 'tester', 'creation_date', 'modification_date')
     search_fields = ('email', 'full_name')
     fieldsets = (
         (None, {'fields': ('email', 'full_name')}),
