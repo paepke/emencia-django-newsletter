@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from html2text import html2text as html2text_orig
 
+from emencia.signals import contact_unsubscribed
 from emencia.models import Newsletter, MailingList, ContactMailingStatus, SubscriberVerification
 from emencia.settings import DEFAULT_HEADER_REPLY, UNSUBSCRIBE_ALL, AUTO_SUBSCRIBE_TO_ONLY_LIST, AUTO_SUBSCRIBE_LIST_NAME
 from emencia.utils.tokens import untokenize
@@ -38,6 +39,7 @@ def view_mailinglist_unsubscribe(request, slug, uidb36, token):
 
             if not already_unsubscribed:
                 mailing_list.unsubscribers.add(contact)
+            contact_unsubscribed.send(sender=contact, mailing_list=mailing_list)
             unsubscribed += 1
 
     if unsubscribed > 0:
