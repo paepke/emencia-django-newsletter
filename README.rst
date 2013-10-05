@@ -1,5 +1,63 @@
-A word of warning
-=================
+Changelog
+=========
+
+2013-10-5 marshalc :: @rassie / Nikolai has been busy :-) After a few months away from this project, I've come back
+to see that he's been nicely patching things up far more neatly than I had done. My thanks to him and the other
+contributors!
+* Determined some missing packages for requirements, added requirements.txt (I deploy this as part of other projects,
+  so this makes it easier for me)
+ToDo
+* Fix bug where adding a URL causes the newsletter creation to fail.
+* Most of what was on my last todo list...
+* UPDATE THE DOCUMENTATION! I've been making notes in my own wiki, need to combine those with a review of the below
+  and try to make this into something more formal and useful. Don't hold your breath though ;-)
+
+2013-6-28 rassie :: Changelog since @marshalc's version...
+* Restored migrations
+* Added missing dependencies, thrown out unnecessary ones
+* Reverted Contact.owner field (based on discussion with original author)
+* Changed slug handling to AutoSlugField
+* Merged Contact.first_name and Contact.last_name to Contact.full_name
+* Enabled and extended automatical subscription to mailing lists
+* General cleanup
+* Converted verification mail to template
+ToDos
+* It might make sense to revert the namespace flattening. There was
+  little sense in that other than avoiding Django's incomplete
+  namespace package support and other than that, **emencia** is a
+  bigger project than just newsletters, which we don't own. Either we
+  are going to bring the original **emencia-django-newsletter** up to
+  speed or we'll need to rename, either way the namespace will change,
+  but having the project under the original name would make merging
+  back to Emencia easier.
+* Subscriber verification should be more obvious
+* Extend templating
+* Make overriding default 4templates possible
+
+2013-5-28 marshalc :: My notes on work done so far, and work to be done... mostly to be done ;-)
+* Combined the verification process into the basic subscription form.
+ * Still needs the normal subscribe form modifying and the urls unmangling.
+ * Also needs to be able to sign up for specific mailing lists (public and private?)
+* Need to update and consolidate the documentation from the various merged branches
+* Have removed all the previous merged migrations, since this is effectively a clean
+install with too much of a mixed heritage for past upgrades to work easily.
+* Need to finish the code inspection and cleanup. PyCharm has identified 1312 issues (
+admittedly 1003 of them are spelling concerns!) for me to look through.
+* HTML Link as content isn't presently working...
+* What are Workgroups? How do they differ/compare with Segments?
+* What does the Premailer do? Answer: Seems to be responsible for parsing html pages into content for the newsletter.
+ * Needs some work!
+ * Go look at https://github.com/kapt/emencia-django-newsletter/commit/837a3a35c0bdb5bda1ec6e9c73db35cf8156496c for some inspiration
+* Tidy up, understand and expand on what the Templates functionality does (or doesn't).
+* I want to add:
+ * Mezzanine support - tie it into the blog system elegantly
+ * WYSIWYG editor made active - several of the merges suggest work has been done on
+   this, but I need to active and test it.
+ * Need to work out which packages have been used as the base for tinymce and ckeditor
+
+
+A word of warning from @rassie
+==============================
 
 This fork is an attempt to clean up, in part rewrite and extend the
 original **emencia-django-newsletter** with patches available in
@@ -21,33 +79,8 @@ discussing taking over the maintenance from Emencia, in case they find
 this acceptable. If not, we'll probably have to proper fork and rename
 this project.
 
-Changelog since @marshalc's version
------------------------------------
 
-* Restored migrations
-* Added missing dependencies, thrown out unnecessary ones
-* Reverted Contact.owner field (based on discussion with original author)
-* Changed slug handling to AutoSlugField
-* Merged Contact.first_name and Contact.last_name to Contact.full_name
-* Enabled and extended automatical subscription to mailing lists
-* General cleanup
-* Converted verification mail to template
-
-TODOs
------
-
-* It might make sense to revert the namespace flattening. There was
-  little sense in that other than avoiding Django's incomplete
-  namespace package support and other than that, **emencia** is a
-  bigger project than just newsletters, which we don't own. Either we
-  are going to bring the original **emencia-django-newsletter** up to
-  speed or we'll need to rename, either way the namespace will change,
-  but having the project under the original name would make merging
-  back to Emencia easier.
-* Subscriber verification should be more obvious
-* Extend templating
-* Make overriding default 4templates possible
-
+----------------------------------------------------------------------
 
 And now, for the original documentation
 
@@ -57,7 +90,7 @@ Emencia Django Newsletter
 
 The problematic was :
 
- *How to couple a contact base to a mailing list and sending newsletters throught Django ?*
+ * How to couple a contact base to a mailing list and sending newsletters through Django ? *
 
 Imagine that we have an application containing some kind of profiles or something like the **django.contrib.auth** and you want to send newsletters to them and tracking the activity.
 
@@ -92,9 +125,9 @@ Content types
 -------------
 
 The **content types** application is used to link any *Contact* model instance to another model instance.
-This allow you to create different kinds of contact linked to differents application, and retrieve the association at anytime.
+This allow you to create different kinds of contact linked to different application, and retrieve the association at anytime.
 
-This is particulary usefull with the templates variables if certain informations are located in the model instance linked.
+This is particularly useful with the templates variables if certain information is located in the model instance linked.
 
 Cronjob/Command
 ---------------
@@ -105,9 +138,9 @@ The emencia.django.newsletter application will never send the newsletters regist
 
 This command will launch the newsletters who need to be launched accordingly to the credits of the SMTP server of the newsletter.
 That's mean that not all newsletters will be expedied at the end of the command because if you use a public SMTP server you can be banished temporarly if you reach the sending limit.
-To avoid banishment all the newsletters are not sended in the same time and immediately.
+To avoid banishment all the newsletters are not sent at the same time or immediately.
 
-So it is recommanded to create a **cronjob** for launching this command every hours for example.
+So it is recommended to create a **cronjob** for launching this command every hours for example.
 
 Installation
 ============
@@ -244,7 +277,7 @@ In his AdminModel definition add this method and register it into the *actions* 
           new_mailing.save()
           new_mailing.subscribers.add(*subscribers)
           new_mailing.save()
-          self.message_user(request, '%s succesfully created.' % new_mailing)
+          self.message_user(request, '%s successfully created.' % new_mailing)
       make_mailing_list.short_description = 'Create a mailing list'
 
       actions = ['make_mailing_list']
@@ -272,7 +305,7 @@ Follow these steps to start the development : ::
   $ python bootstrap.py
   $ ./bin/buildout
 
-The buildout script will resolve all the dependancies needed to develop the application.
+The buildout script will resolve all the dependencies needed to develop the application.
 
 Once these operations are done, you are ready to develop on the project.
 
@@ -308,16 +341,16 @@ Database Representation
 .. image:: https://github.com/Fantomas42/emencia-django-newsletter/raw/master/docs/graph_model.png
 
 
-Tracking Ignore Ankers
-======================
+Tracking Ignore Anchors
+=======================
 
 How to use
 ----------
 Simply set the option ``NEWSLETTER_TRACKING_IGNORE_ANCHOR = True`` to track no
 ankers in your email.
 
-The goal of this option is so send emails with a template that has ankers, but
-if ``NEWSLETTER_TRACKING_LINKS`` is enabled, the ankers won't work.
+The goal of this option is so send emails with a template that has anchors, but
+if ``NEWSLETTER_TRACKING_LINKS`` is enabled, the anchors won't work.
 
 Subscriber Verification
 =======================
@@ -348,12 +381,12 @@ Thats all. :)
 Urls
 ----
   * <host>/newsletters/subscribe > to subscribe the email
-  * <host>/newsletters/subscribe/<uuid> > to verificate the email
+  * <host>/newsletters/subscribe/<uuid> > to verify the email
 
 Templates
 ---------
   * subscriber_verification.html > to subscribe the email
-  * uuid_verification.html > to verificate the email
+  * uuid_verification.html > to verify the email
 
 Notes
 -----
@@ -366,35 +399,8 @@ Notes
 Update
 ------
 If you update from a prior version of this newsletter, please run ``dbshell``
-and add the column vriefied to newsletter_contact.
+and add the column verified to newsletter_contact.
 
 sqlite command ::
 
     ALTER TABLE newsletter_contact ADD COLUMN verified bool;
-
-
-
-Work in progress
-================
-
-My (marshalc) notes on work done so far, and work to be done... mostly to be done ;-)
-
-  * Combined the verification process into the basic subscription form.
-     * Still needs the normal subscribe form modifying and the urls unmangling.
-     * Also needs to be able to sign up for specific mailing lists (public and private?)
-  * Need to update and consolidate the documentation from the various merged branches
-  * Have removed all the previous merged migrations, since this is effectively a clean
-    install with too much of a mixed heritage for past upgrades to work easily.
-  * Need to finish the code inspection and cleanup. PyCharm has identified 1312 issues (
-    admittedly 1003 of them are spelling concerns!) for me to look through.
-  * HTML Link as content isn't presently working...
-  * What are Workgroups? How do they differ/compare with Segments?
-  * What does the Premailer do? Answer: Seems to be responsible for parsing html pages into content for the newsletter.
-     * Needs some work!
-     * Go look at https://github.com/kapt/emencia-django-newsletter/commit/837a3a35c0bdb5bda1ec6e9c73db35cf8156496c for some inspiration
-  * Tidy up, understand and expand on what the Templates functionality does (or doesn't).
-  * I want to add:
-     * Mezzanine support - tie it into the blog system elegantly
-     * WYSIWYG editor made active - several of the merges suggest work has been done on
-       this, but I need to active and test it.
-        * Need to work out which packages have been used as the base for tinymce and ckeditor
