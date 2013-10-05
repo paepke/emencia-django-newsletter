@@ -5,7 +5,6 @@ from django.contrib import admin
 from django.conf import settings
 
 from emencia.models import Contact
-from emencia.models import SMTPServer
 from emencia.models import Newsletter
 from emencia.models import MailingList
 from emencia.models import SubscriberVerification
@@ -13,13 +12,11 @@ from emencia.models import SubscriberVerification
 from emencia.settings import USE_WORKGROUPS
 
 from emencia.admin.contact import ContactAdmin
-from emencia.admin.smtpserver import SMTPServerAdmin
 from emencia.admin.newsletter import NewsletterAdmin
 from emencia.admin.mailinglist import MailingListAdmin
 from emencia.admin.mailinglist import SubscriberVerificationAdmin
 
 admin.site.register(Contact, ContactAdmin)
-admin.site.register(SMTPServer, SMTPServerAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(MailingList, MailingListAdmin)
 admin.site.register(SubscriberVerification, SubscriberVerificationAdmin)

@@ -1,4 +1,5 @@
 {% extends "admin/change_list.html" %}
+{% load url from future %}
 {% load i18n %}
 
 {% block bodyclass %}change-list historic{% endblock %}
@@ -7,7 +8,7 @@
     {% if not is_popup %}
         <div class="breadcrumbs">
             <a href="{% url 'admin:index' %}">{% trans "Admin." %}</a> &rsaquo;
-            <a href="{% url 'admin:app_list' 'newsletter' %}">{{ app_label|capfirst|escape }}</a> &rsaquo;
+            <a href="{% url 'admin:app_list' 'emencia' %}">{{ app_label|capfirst|escape }}</a> &rsaquo;
             <a href="{% url 'admin:emencia_newsletter_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
             {{ title }}
         </div>

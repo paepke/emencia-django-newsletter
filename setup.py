@@ -27,7 +27,7 @@ setup(name='emencia',
 
       license=emencia.__license__,
       packages=find_packages(exclude=['demo']),
-      namespace_packages=['emencia',],
+      #namespace_packages=['emencia',],
       include_package_data=True,
       zip_safe=False,
       install_requires=['setuptools',
@@ -40,4 +40,7 @@ setup(name='emencia',
                         'xlrd',
                         'premailer',
                         'django-filebrowser-no-grappelli',
-                        'django-tinymce'])
+                        'django-tinymce',
+                        'django-uuidfield',
+                        'South',
+                        'django-autoslug==1.6.1'])

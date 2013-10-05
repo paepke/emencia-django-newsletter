@@ -12,9 +12,10 @@ from emencia.models import Contact
 from emencia.models import Newsletter
 from emencia.models import Attachment
 from emencia.models import MailingList
-from emencia.mailer import Mailer
 from emencia.settings import USE_TINYMCE, USE_CKEDITOR
 from emencia.settings import USE_WORKGROUPS
+from emencia.settings import DEFAULT_HEADER_SENDER
+from emencia.settings import DEFAULT_HEADER_REPLY
 from emencia.settings import TINYMCE_WIDGET_ATTRS
 from emencia.utils.workgroups import request_workgroups
 from emencia.utils.workgroups import request_workgroups_contacts_pk
@@ -30,7 +31,7 @@ class AttachmentAdminInline(admin.TabularInline):
 
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('title', 'mailing_list', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',
+    list_display = ('title', 'mailing_list', 'status', 'sending_date', 'creation_date', 'modification_date',
                     'historic_link', 'statistics_link')
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'content', 'header_sender', 'header_reply')
@@ -39,9 +40,8 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
         (None, {'fields': ('title', 'template', 'content', 'public',)}),
         (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
         (_('Sending'), {'fields': ('sending_date', 'status',)}),
-        (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
+        (_('Miscellaneous'), {'fields': ('header_sender', 'header_reply', 'base_url'), 'classes': ('collapse',)}),
     )
-    prepopulated_fields = {'slug': ('title',)}
     inlines = (AttachmentAdminInline,)
     actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'duplicate']
     actions_on_top = False
@@ -60,6 +60,15 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
             newsletters_pk = request_workgroups_newsletters_pk(request)
             queryset = queryset.filter(pk__in=newsletters_pk)
         return queryset
+
+    def formfield_for_dbfield(self, field, **kwargs):
+        if field.name == 'header_sender':
+            kwargs['initial'] = DEFAULT_HEADER_SENDER
+        if field.name == 'header_reply':
+            kwargs['initial'] = DEFAULT_HEADER_REPLY
+        if field.name == 'base_url':
+            kwargs['initial'] = "%s://%s" % ('https' if kwargs['request'].is_secure() else 'http', kwargs['request'].get_host())
+        return super(BaseNewsletterAdmin, self).formfield_for_dbfield(field, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'mailing_list' and not request.user.is_superuser and USE_WORKGROUPS:
@@ -121,64 +130,48 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
     def send_mail_test(self, request, queryset):
         """Send newsletter in test"""
         for newsletter in queryset:
-            if newsletter.test_contacts.count():
-                mailer = Mailer(newsletter, test=True)
-                try:
-                    mailer.run()
-                except HTMLParseError:
-                    self.message_user(request, _('Unable send newsletter, due to errors within HTML.'))
-                    continue
-                self.message_user(request, _('%s succesfully sent.') % newsletter)
-            else:
-                self.message_user(request, _('No test contacts assigned for %s.') % newsletter)
+            try:
+                newsletter.send(newsletter.test_contacts.all(), force_now=True)
+            except HTMLParseError:
+                self.message_user(request, _('Unable send newsletter, due to errors within HTML.'))
+                continue
+            self.message_user(request, _('%s succesfully sent.') % newsletter)
     send_mail_test.short_description = _('Send test email')
 
     def make_ready_to_send(self, request, queryset):
         """Make newsletter ready to send"""
         from django.contrib import messages
-        queryset = queryset.filter(status=Newsletter.DRAFT)
-        emails_to_send = 0
-        sent_all = True
-        for newsletter in queryset:
-            emails_to_send += len(newsletter.mailing_list.expedition_set())
-            if emails_to_send > newsletter.server.emails_remains:
-                messages.warning(request, _('You do not have enough e-mail'))
-                sent_all = False
-                break
-            newsletter.status = Newsletter.WAITING
-            newsletter.server.emails_remains = newsletter.server.emails_remains - emails_to_send
-            newsletter.server.save()
-            newsletter.save()
-        if sent_all:
-            messages.success(request, _('%s newletters are ready to send') % queryset.count())
+        queryset.filter(status=Newsletter.DRAFT).update(status=Newsletter.WAITING)
+        messages.success(request, _('%s newletters are ready to send') % queryset.count())
         # self.message_user(request, message)
     make_ready_to_send.short_description = _('Make ready to send')
 
     def make_cancel_sending(self, request, queryset):
         """Cancel the sending of newsletters"""
-        queryset = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
-        for newsletter in queryset:
-            newsletter.status = Newsletter.CANCELED
-            newsletter.save()
+        queryset = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING)).update(status=Newsletter.CANCELED)
         self.message_user(request, _('%s newletters are cancelled') % queryset.count())
     make_cancel_sending.short_description = _('Cancel the sending')
 
     def duplicate(self, request, queryset):
         """Duplicate selected newsletters"""
         for newsletter in queryset:
+            attachments = newsletter.attachment_set.all()
             newsletter.pk = None
             i = 1
-            while Newsletter.objects.filter(slug=u'%s-%s' % (newsletter.slug, i)).count() > 0:
+            while Newsletter.objects.filter(title=u'%s [%s]' % (newsletter.title, i)).count() > 0:
                 i += 1
-            newsletter.slug = u'%s-%s' % (newsletter.slug, i)
             newsletter.title = u'%s [%s]' % (newsletter.title, i)
             newsletter.save()
+            for att in attachments:
+                att.pk = None
+                att.newsletter = newsletter
+                att.save()
 
 if USE_TINYMCE:
     from tinymce.widgets import TinyMCE
 
     class NewsletterTinyMCEForm(forms.ModelForm):
-        content = forms.CharField(
+        content = forms.CharField(label=_('content'),
             widget=TinyMCE(attrs=TINYMCE_WIDGET_ATTRS))
 
         class Meta:
@@ -203,3 +196,4 @@ elif USE_CKEDITOR:
 else:
     class NewsletterAdmin(BaseNewsletterAdmin):
         pass
+

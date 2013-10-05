@@ -13,7 +13,7 @@ from emencia.models import Contact
 from emencia.models import MailingList
 
 
-COLUMNS = ['email', 'first_name', 'last_name', 'tags']
+COLUMNS = ['email', 'full_name']
 csv.register_dialect('edn', delimiter=';')
 
 
@@ -61,8 +61,7 @@ def vcard_contacts_import(stream, mailing_list=None, segment=None):
 
     for vcard in vcards:
         contact = {'email': vcard.email.value,
-                   'first_name': vcard.n.value.given,
-                   'last_name': vcard.n.value.family}
+                   'full_name': "%s %s" % (vcard.n.value.given, vcard.n.value.family)}
         contacts.append(contact)
 
     return create_contacts(contacts, 'vcard', mailing_list, segment)

@@ -2,31 +2,19 @@
 Views for emencia Mailing List and Subscriber Verification
 """
 import re
-
-from django.template import RequestContext
-from django.shortcuts import get_object_or_404, render_to_response
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.encoders import encode_base64
-from email.mime.audio import MIMEAudio
-from email.mime.base import MIMEBase
-from email.mime.image import MIMEImage
-
-from emencia.models import Newsletter
-from emencia.models import MailingList
-from emencia.models import ContactMailingStatus
-from emencia.models import SMTPServer
-from emencia.models import SubscriberVerification
-from emencia.settings import DEFAULT_HEADER_REPLY
-from emencia.settings import UNSUBSCRIBE_ALL
-from emencia.utils.tokens import untokenize
-
 from StringIO import StringIO
 
+from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template import Context, RequestContext
+from django.template.loader import render_to_string
+from django.utils.encoding import smart_str
 from html2text import html2text as html2text_orig
+
+from emencia.signals import contact_unsubscribed
+from emencia.models import Newsletter, MailingList, ContactMailingStatus, SubscriberVerification
+from emencia.settings import DEFAULT_HEADER_REPLY, UNSUBSCRIBE_ALL, AUTO_SUBSCRIBE_TO_ONLY_LIST, AUTO_SUBSCRIBE_LIST_NAME
+from emencia.utils.tokens import untokenize
 
 
 def view_mailinglist_unsubscribe(request, slug, uidb36, token):
@@ -47,11 +35,9 @@ def view_mailinglist_unsubscribe(request, slug, uidb36, token):
 
     if request.POST.get('email'):
         for mailing_list in mailing_lists:
-            already_unsubscribed = contact in mailing_list.unsubscribers.all()
-
-            if not already_unsubscribed:
-                mailing_list.unsubscribers.add(contact)
-                mailing_list.save()
+            mailing_list.unsubscribers.add(contact)
+            mailing_list.subscribers.remove(contact)
+            contact_unsubscribed.send(sender=contact, mailing_list=mailing_list)
             unsubscribed += 1
 
     if unsubscribed > 0:
@@ -111,8 +97,8 @@ def html2text(html):
     out.write(txt[pos:])
     return out.getvalue()
 
+def _view_subscriber_verification_context(request, form_class):
 
-def view_subscriber_verification(request, form_class):
     """
     A simple view that shows a form for subscription for the newsletter.
     """
@@ -120,60 +106,57 @@ def view_subscriber_verification(request, form_class):
 
     if request.POST:
         context['form'] = form_class(request.POST)
-        subscription = SubscriberVerification()
         if context['form'].is_valid():
-            contact = context['form'].save()
-
+            subscription = SubscriberVerification()
+            contact = context['form'].save()                
             subscription.contact = context['form'].instance
             subscription.save()
-            link_id = subscription.link_id
 
-            server = SMTPServer.objects.get(id=1)  # TODO: Fix this assumption that the first smtp is id 1
-            smtp = server.connect()
+            link_id = str(subscription.link_id)
 
-            message = _('Thanks for subscription, please click the following link to verify your email address.')
-            from_mail = DEFAULT_HEADER_REPLY
-            to_mail = context['form'].instance.email
+            mail_context = Context({
+                'base_url': "%s://%s" % ("https" if request.is_secure() else "http", request.get_host()),
+                'link_id': link_id,
+            })
 
-            # TODO: Make this more neatly tied to the urls config
-            link = 'http://{0}/newsletters/mailing/{1}'.format(str(request.get_host()), str(link_id))
-            content_html = u'<body><p>{0!s}</p><p><a href="{1}">{2}</a></p></body>'.format(
-                message, link, _('verify link'))
+            content_html = render_to_string('newsletter/newsletter_mail_verification.html', mail_context)
+
             content_text = html2text(content_html)
 
-            message = MIMEMultipart()
+            message = EmailMultiAlternatives()
+            message.from_email = smart_str(DEFAULT_HEADER_REPLY)
+            message.extra_headers = {'Reply-to': smart_str(DEFAULT_HEADER_REPLY)}
+            message.to = [smart_str(context['form'].instance.email)]
+            
+            message.subject = render_to_string('newsletter/newsletter_mail_verification_subject.html', context)
 
-            message['Subject'] = _('Subscriber verification')
-            message['From'] = smart_str(DEFAULT_HEADER_REPLY)
-            message['Reply-to'] = smart_str(DEFAULT_HEADER_REPLY)
-            message['To'] = smart_str(context['form'].instance.email)
-
-            message_alt = MIMEMultipart('alternative')
-            message_alt.attach(MIMEText(smart_str(content_text), 'plain', 'UTF-8'))
-            message_alt.attach(MIMEText(smart_str(content_html), 'html', 'UTF-8'))
-            message.attach(message_alt)
+            message.body = smart_str(content_text)
+            message.attach_alternative(smart_str(content_html), "text/html")       
 
             try:
-                smtp.sendmail(from_mail, to_mail, message.as_string())
+                message.send()
             except Exception, e:
                 print e
-            smtp.quit()
 
             context['send'] = True
 
     else:
         context['form'] = form_class()
 
+    return context
+
+
+def view_subscriber_verification(request, form_class):
+
+    context = _view_subscriber_verification_context(request, form_class)
+    
     return render_to_response(
         'newsletter/subscriber_verification.html',
         context,
         context_instance=RequestContext(request)
     )
 
-def view_uuid_verification(request, link_id, form_class=None):
-    """
-    A simple view that shows if verification is true or false.
-    """
+def _view_uuid_verification_context(request, link_id, form_class=None):
     context = {}
     context['mailinglists'] = mailinglists = MailingList.objects.filter(public=True)
     context['mailing_list_count'] = mailinglists.count()
@@ -185,11 +168,25 @@ def view_uuid_verification(request, link_id, form_class=None):
         context['uuid_exist'] = True
         subscription['contact'] = subscription['object'].contact
         ready = True
-        # Can't see what this is about...
-        # if context['mailing_list_count'] == 1:
-        #     mailing_list = mailinglists.get().subscribers.add(
-        #         subscription['contact'].id
-        #     )
+
+        # If there is only one mailing list, subscribe the (now)
+        # verified user to it
+        if AUTO_SUBSCRIBE_TO_ONLY_LIST:
+            if context['mailing_list_count'] == 1:
+                mailing_list = mailinglists.get()
+                mailing_list.subscribers.add(subscription['contact'].id)
+                mailing_list.unsubscribers.remove(subscription['contact'].id)
+
+        if AUTO_SUBSCRIBE_LIST_NAME is not None:
+            if isinstance(AUTO_SUBSCRIBE_LIST_NAME, basestring):
+                lists = [AUTO_SUBSCRIBE_LIST_NAME]
+            else:
+                lists = AUTO_SUBSCRIBE_LIST_NAME
+
+            mls = mailinglists.filter(name__in=lists)
+            for ml in mls:
+                ml.subscribers.add(subscription['contact'].id)
+                ml.unsubscribers.remove(subscription['contact'].id)
 
         if request.POST:
             form = form_class(request.POST)
@@ -208,6 +205,15 @@ def view_uuid_verification(request, link_id, form_class=None):
 
     except SubscriberVerification.DoesNotExist:
         context['uuid_exist'] = False
+
+    return context
+
+def view_uuid_verification(request, link_id, form_class=None):
+    """
+    A simple view that shows if verification is true or false.
+    """
+
+    context = _view_uuid_verification_context(request, link_id, form_class)
 
     return render_to_response(
         'newsletter/uuid_verification.html',

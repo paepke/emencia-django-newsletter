@@ -5,27 +5,26 @@ from bs4 import BeautifulSoup
 
 from django.core.urlresolvers import reverse
 
-from emencia.models import Link
 from emencia.settings import TRACKING_IGNORE_ANCHOR
 from emencia.settings import USE_PRETTIFY
 
-
-def body_insertion(content, insertion, end=False):
-    """Insert an HTML content into the body HTML node"""
-    if not content.startswith('<body'):
-        content = '<body>%s</body>' % content
-    soup = BeautifulSoup(content)
-    insertion = BeautifulSoup(insertion)
-
-    if end:
-        soup.body.append(insertion)
-    else:
-        soup.body.insert(0, insertion)
-
-    if USE_PRETTIFY:
-        return soup.prettify()
-    else:
-        return soup.renderContents()
+###  Moot since all emails are now template based?
+# def body_insertion(content, insertion, end=False):
+#     """Insert an HTML content into the body HTML node"""
+#     if not content.startswith('<body'):
+#         content = '<body>%s</body>' % content
+#     soup = BeautifulSoup(content)
+#     insertion = BeautifulSoup(insertion)
+#
+#     if end:
+#         soup.body.append(insertion)
+#     else:
+#         soup.body.insert(0, insertion)
+#
+#     if USE_PRETTIFY:
+#         return soup.prettify()
+#     else:
+#         return soup.renderContents()
 
 
 def track_links(content, context):
@@ -46,8 +45,8 @@ def track_links(content, context):
             if link_href.startswith("http"):
                 link_title = link_markup.get('title', link_href)
                 link, created = Link.objects.get_or_create(url=link_href, defaults={'title': link_title})
-                link_markup['href'] = 'http://%s%s' % (
-                    context['domain'], 
+                link_markup['href'] = '%s%s' % (
+                    context['base_url'], 
                     reverse(
                         'newsletter_newsletter_tracking_link', 
                         args=[context['newsletter'].slug, context['uidb36'], context['token'], link.pk]
@@ -58,6 +57,7 @@ def track_links(content, context):
         return soup.prettify()
     else:
         return soup.renderContents()
+
 
 def fix_tinymce_links(content):
     """ Clean the src attribute of images in content edited with TinyMCE and django-filebrowser"""

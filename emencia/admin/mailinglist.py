@@ -24,9 +24,8 @@ from emencia.utils.workgroups import request_workgroups_mailinglists_pk
 
 class MailingListAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('creation_date', 'public', 'name', 'description', 'subscribers_count', 'unsubscribers_count',
-                    'exportation_links')
-    list_editable = ('name', 'description')
+    list_display = ('name', 'public', 'creation_date', 'description', 'subscribers_count', 'unsubscribers_count',
+                    'export_links')
     list_filter = ('creation_date', 'modification_date')
     search_fields = ('name', 'description',)
     filter_horizontal = ['subscribers', 'unsubscribers']
@@ -91,15 +90,15 @@ class MailingListAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse(urlname, args=[new_mailing.pk]))
     merge_mailinglist.short_description = _('Merge selected mailinglists')
 
-    def exportation_links(self, mailinglist):
-        """Display links for exportation"""
+    def export_links(self, mailinglist):
+        """Display links for export"""
         return u'<a href="%s">%s</a> / <a href="%s">%s</a>' % (
             reverse('admin:%s_mailinglist_export_excel' % self.opts.app_label,
                     args=[mailinglist.pk]), _('Excel'),
             reverse('admin:%s_mailinglist_export_vcard' % self.opts.app_label,
                     args=[mailinglist.pk]), _('VCard'))
-    exportation_links.allow_tags = True
-    exportation_links.short_description = _('Export')
+    export_links.allow_tags = True
+    export_links.short_description = _('Export')
 
     def exportion_vcard(self, request, mailinglist_id):
         """Export subscribers in the mailing in VCard"""
@@ -128,4 +127,5 @@ class MailingListAdmin(admin.ModelAdmin):
 
 
 class SubscriberVerificationAdmin(admin.ModelAdmin):
+    readonly_fields = ("link_id",)
     fields = ['link_id', 'contact']

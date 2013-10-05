@@ -1,5 +1,5 @@
 """emencia"""
-__version__ = '0.4.dev'
+__version__ = '0.4.dev.rassie'
 __license__ = 'BSD License'
 
 __author__ = 'Fantomas42'

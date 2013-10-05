@@ -8,7 +8,6 @@ from django.template import Context
 from django.template import RequestContext
 from django.template import Template
 
-from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 
 from emencia.models import ContactMailingStatus
@@ -26,7 +25,7 @@ def render_newsletter(request, slug, context):
     context.update({
         'newsletter': newsletter,
         'title': newsletter.title,
-        'domain': Site.objects.get_current().domain,
+        'base_url': newsletter.base_url,
     })
 
     message_content = newsletter.content
@@ -43,7 +42,11 @@ def render_newsletter(request, slug, context):
     if TRACKING_LINKS:
         message = track_links(message, context)
 
-    return render_to_response("newsletter/%s" % newsletter.template, context, context_instance=RequestContext(request))
+    return render_to_response(
+        'mailtemplates/{0}/{1}'.format(newsletter.template, 'index.html'),
+        context,
+        context_instance=RequestContext(request)
+    )
 
 
 @staff_member_required
