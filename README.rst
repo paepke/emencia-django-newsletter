@@ -7,7 +7,6 @@ contributors!
  * Determined some missing packages for requirements, added requirements.txt (I deploy this as part of other projects, so this makes it easier for me)
 
 ToDo
-
  * Fix bug where adding a URL causes the newsletter creation to fail.
  * Most of what was on my last todo list...
  * UPDATE THE DOCUMENTATION! I've been making notes in my own wiki, need to combine those with a review of the below and try to make this into something more formal and useful. Don't hold your breath though ;-)
@@ -37,25 +36,23 @@ ToDos
 * Make overriding default 4templates possible
 
 2013-5-28 marshalc :: My notes on work done so far, and work to be done... mostly to be done ;-)
-* Combined the verification process into the basic subscription form.
- * Still needs the normal subscribe form modifying and the urls unmangling.
- * Also needs to be able to sign up for specific mailing lists (public and private?)
-* Need to update and consolidate the documentation from the various merged branches
-* Have removed all the previous merged migrations, since this is effectively a clean
-install with too much of a mixed heritage for past upgrades to work easily.
-* Need to finish the code inspection and cleanup. PyCharm has identified 1312 issues (
-admittedly 1003 of them are spelling concerns!) for me to look through.
-* HTML Link as content isn't presently working...
-* What are Workgroups? How do they differ/compare with Segments?
-* What does the Premailer do? Answer: Seems to be responsible for parsing html pages into content for the newsletter.
- * Needs some work!
- * Go look at https://github.com/kapt/emencia-django-newsletter/commit/837a3a35c0bdb5bda1ec6e9c73db35cf8156496c for some inspiration
-* Tidy up, understand and expand on what the Templates functionality does (or doesn't).
-* I want to add:
- * Mezzanine support - tie it into the blog system elegantly
- * WYSIWYG editor made active - several of the merges suggest work has been done on
-   this, but I need to active and test it.
- * Need to work out which packages have been used as the base for tinymce and ckeditor
+    * Combined the verification process into the basic subscription form.
+        * Still needs the normal subscribe form modifying and the urls unmangling.
+        * Also needs to be able to sign up for specific mailing lists (public and private?)
+    * Need to update and consolidate the documentation from the various merged branches
+    * Have removed all the previous merged migrations, since this is effectively a clean install with too much of a mixed heritage for past upgrades to work easily.
+    * Need to finish the code inspection and cleanup. PyCharm has identified 1312 issues (admittedly 1003 of them are spelling concerns!) for me to look through.
+    * HTML Link as content isn't presently working...
+    * What are Workgroups? How do they differ/compare with Segments?
+    * What does the Premailer do? Answer: Seems to be responsible for parsing html pages into content for the newsletter.
+        * Needs some work!
+        * Go look at https://github.com/kapt/emencia-django-newsletter/commit/837a3a35c0bdb5bda1ec6e9c73db35cf8156496c for some inspiration
+    * Tidy up, understand and expand on what the Templates functionality does (or doesn't).
+    * I want to add:
+        * Mezzanine support - tie it into the blog system elegantly
+        * WYSIWYG editor made active - several of the merges suggest work has been done on
+        this, but I need to active and test it.
+        * Need to work out which packages have been used as the base for tinymce and ckeditor
 
 
 A word of warning from @rassie
