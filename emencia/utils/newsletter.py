@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 
 from emencia.settings import TRACKING_IGNORE_ANCHOR
 from emencia.settings import USE_PRETTIFY
+from emencia.models import Link
 
 ###  Moot since all emails are now template based?
 # def body_insertion(content, insertion, end=False):
