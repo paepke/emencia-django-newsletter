@@ -4,24 +4,26 @@ Changelog
 2013-10-5 marshalc :: @rassie / Nikolai has been busy :-) After a few months away from this project, I've come back
 to see that he's been nicely patching things up far more neatly than I had done. My thanks to him and the other
 contributors!
-* Determined some missing packages for requirements, added requirements.txt (I deploy this as part of other projects,
-  so this makes it easier for me)
+ * Determined some missing packages for requirements, added requirements.txt (I deploy this as part of other projects, so this makes it easier for me)
+
 ToDo
-* Fix bug where adding a URL causes the newsletter creation to fail.
-* Most of what was on my last todo list...
-* UPDATE THE DOCUMENTATION! I've been making notes in my own wiki, need to combine those with a review of the below
-  and try to make this into something more formal and useful. Don't hold your breath though ;-)
+
+ * Fix bug where adding a URL causes the newsletter creation to fail.
+ * Most of what was on my last todo list...
+ * UPDATE THE DOCUMENTATION! I've been making notes in my own wiki, need to combine those with a review of the below and try to make this into something more formal and useful. Don't hold your breath though ;-)
 
 2013-6-28 rassie :: Changelog since @marshalc's version...
-* Restored migrations
-* Added missing dependencies, thrown out unnecessary ones
-* Reverted Contact.owner field (based on discussion with original author)
-* Changed slug handling to AutoSlugField
-* Merged Contact.first_name and Contact.last_name to Contact.full_name
-* Enabled and extended automatical subscription to mailing lists
-* General cleanup
-* Converted verification mail to template
+ * Restored migrations
+ * Added missing dependencies, thrown out unnecessary ones
+ * Reverted Contact.owner field (based on discussion with original author)
+ * Changed slug handling to AutoSlugField
+ * Merged Contact.first_name and Contact.last_name to Contact.full_name
+ * Enabled and extended automatical subscription to mailing lists
+ * General cleanup
+ * Converted verification mail to template
+
 ToDos
+
 * It might make sense to revert the namespace flattening. There was
   little sense in that other than avoiding Django's incomplete
   namespace package support and other than that, **emencia** is a
