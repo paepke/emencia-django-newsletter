@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from emencia.models import Contact
 from emencia.models import MailingList
-from emencia.models import SubscriberVerification
+#from emencia.models import SubscriberVerification
 
 
 class MailingListSubscriptionForm(forms.ModelForm):
