@@ -294,7 +294,7 @@ msgstr "%s úspešne vytvorený."
 msgid "Create a mailinglist"
 msgstr "Vytvoriť zoznam emailov"
 
-#: admin/contact.py:144
+#: admin/contact.py:126
 #, python-format
 msgid "%s contacts succesfully imported."
 msgstr "%s kontaktov úspešne importovaných."
@@ -338,11 +338,11 @@ msgstr "VCard"
 msgid "Export"
 msgstr "Export"
 
-#: admin/newsletter.py:40
+#: admin/newsletter.py:41
 msgid "Receivers"
 msgstr "Príjemcovia"
 
-#: admin/newsletter.py:41
+#: admin/newsletter.py:42
 msgid "Sending"
 msgstr "Odosielanie"
 

@@ -1,3 +1,4 @@
+# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # 
@@ -35,7 +36,7 @@ msgstr ""
 
 #: models.py:49
 msgid "subscriber"
-msgstr "iscritto"
+msgstr "sottoscrittore"
 
 #: models.py:50
 msgid "valid email"
@@ -132,11 +133,11 @@ msgstr ""
 
 #: models.py:142 models.py:155 models.py:181
 msgid "subscribers"
-msgstr "iscritti"
+msgstr "sottoscrittori"
 
 #: models.py:146 models.py:159
 msgid "unsubscribers"
-msgstr "non iscritti"
+msgstr "sottoscrizione rimossa"
 
 #: models.py:170 models.py:223 cmsplugin_newsletter/models.py:15
 msgid "mailing list"
@@ -171,8 +172,6 @@ msgid ""
 "You can use the \"{{ UNIQUE_KEY }}\" variable for unique identifier within "
 "the newsletter's title."
 msgstr ""
-"Puoi usare la variabile \"{{ UNIQUE_KEY }}\" per inserire un identificatore "
-"nel titolo della newsletter."
 
 #: models.py:215 admin/newsletter.py:169
 msgid "content"
@@ -260,7 +259,7 @@ msgstr "Stato"
 
 #: admin/contact.py:67
 msgid "Total subscriptions"
-msgstr "Iscrizioni totali"
+msgstr "Sottoscrizioni totali"
 
 #: admin/contact.py:72
 msgid "Export contacts as VCard"
@@ -295,7 +294,7 @@ msgstr "%s creata con successo."
 msgid "Create a mailinglist"
 msgstr "Crea una lista di distribuzione"
 
-#: admin/contact.py:144
+#: admin/contact.py:126
 #, python-format
 msgid "%s contacts succesfully imported."
 msgstr "%s contatti importati con successo."
@@ -306,7 +305,7 @@ msgstr "Importazione contatti"
 
 #: admin/mailinglist.py:66
 msgid "Please select a least 2 mailing list."
-msgstr "Seleziona almeno 2 liste di distribuzione."
+msgstr "Seleziona almento 2 liste di distribuzione."
 
 #: admin/mailinglist.py:78
 #, python-format
@@ -339,11 +338,11 @@ msgstr "VCard"
 msgid "Export"
 msgstr "Esporta"
 
-#: admin/newsletter.py:40
+#: admin/newsletter.py:41
 msgid "Receivers"
 msgstr "Destinatari"
 
-#: admin/newsletter.py:41
+#: admin/newsletter.py:42
 msgid "Sending"
 msgstr "Invio in corso"
 
@@ -357,7 +356,7 @@ msgstr "Predefinito"
 
 #: admin/newsletter.py:109
 msgid "Unable to download HTML, due to errors within."
-msgstr "Impossibile scaricare l'HTML a causa di errori nel codice."
+msgstr "Impossibile scaricare l'HTML, a causa di errori nel codice."
 
 #: admin/newsletter.py:117
 msgid "View historic"
@@ -381,7 +380,7 @@ msgstr "Statistiche"
 
 #: admin/newsletter.py:136
 msgid "Unable send newsletter, due to errors within HTML."
-msgstr "Impossibile inviare la newsletter per errori nel codice HTML."
+msgstr "Impossibile inviare la newsletter, per errori nel codice HTML."
 
 #: admin/newsletter.py:138
 #, python-format
@@ -424,7 +423,7 @@ msgstr "Lunghezza newsletter"
 
 #: cmsplugin_newsletter/cms_plugins.py:15
 msgid "Subscription Form"
-msgstr "Modulo di iscrizione"
+msgstr "Modulo di abbonamento"
 
 #: cmsplugin_newsletter/models.py:13
 msgid "show description"
@@ -432,11 +431,11 @@ msgstr "mostra descrizione"
 
 #: cmsplugin_newsletter/models.py:14
 msgid "Show the mailing list's description."
-msgstr "Mostra la descrizione della mailing list."
+msgstr ""
 
 #: cmsplugin_newsletter/models.py:16
 msgid "Mailing List to subscribe to."
-msgstr "Lista di distribuzione a cui iscriversi."
+msgstr "Mailing List per abbonarsi."
 
 #: templates/admin/contact/change_list.html:37
 #, python-format
@@ -449,8 +448,8 @@ msgstr "Azioni"
 
 #: templates/admin/contact/change_list.html:48
 #, python-format
-msgid "Import %(name)s"
-msgstr "Importazione %(name)s"
+msgid "Import %(name)ss"
+msgstr "Importazione %(name)ss"
 
 #: templates/admin/contact/change_list.html:55
 msgid "Add to a mailing list"
@@ -477,13 +476,12 @@ msgstr "Importa contatti da un file Excel."
 #: templates/newsletter/_contact_import_forms.html:16
 msgid "Columns are [email][last name][first name]."
 msgstr ""
-"Le colonne sono [email][last name][first name][tags] (senza i simboli [ ])."
 
 #: templates/newsletter/_contact_import_forms.html:17
 #: templates/newsletter/_contact_import_forms.html:41
 #: templates/newsletter/_contact_import_forms.html:85
 msgid "All columns are optionnal excepting the email."
-msgstr "Tutte le colonne sono opzionali tranne l'e-mail."
+msgstr ""
 
 #: templates/newsletter/_contact_import_forms.html:22
 #: templates/newsletter/_contact_import_forms.html:46
@@ -503,7 +501,7 @@ msgstr "File di testo (.txt, .csv)"
 
 #: templates/newsletter/_contact_import_forms.html:39
 msgid "Import contacts from a text file, or a CSV file."
-msgstr "Importa contatti da un file di testo o in formato CSV."
+msgstr ""
 
 #: templates/newsletter/_contact_import_forms.html:40
 #: templates/newsletter/_contact_import_forms.html:84
@@ -517,12 +515,12 @@ msgstr "File VCard (.cvf)"
 #: templates/newsletter/_contact_import_forms.html:63
 msgid ""
 "Import contacts from your favorite mail client, by providing a VCard file."
-msgstr "Importa i contatti dal tuo programma di posta fornendo un file VCard."
+msgstr ""
 
 #: templates/newsletter/_contact_import_forms.html:76
 #: templates/newsletter/_contact_import_forms.html:80
 msgid "Raw text"
-msgstr "Testo semplice"
+msgstr ""
 
 #: templates/newsletter/contact_import.html:7
 msgid "Home"
@@ -533,15 +531,15 @@ msgstr "Pagina iniziale"
 #: templates/newsletter/mailing_list_subscribe.html:4
 #: templates/newsletter/mailing_list_subscribe.html:7
 msgid "Subscription to mailing list"
-msgstr "Iscrizione alla mailing list"
+msgstr "Abbonati alla mailing list"
 
 #: templates/newsletter/mailing_list_subscribe.html:10
 msgid "Thanks for your subscription!"
-msgstr "Grazie per la tua iscrizione!"
+msgstr "Grazie per il vostro abbonamento!"
 
 #: templates/newsletter/mailing_list_subscribe.html:16
 msgid "Validate this form to subscribe to the mailing lists."
-msgstr "Convalida questo modulo per iscriverti alla lista."
+msgstr "Convalida questo form per abbonarti alla mailing list."
 
 #: templates/newsletter/mailing_list_subscribe.html:21
 #: templates/newsletter/subscriber_verification.html:18
@@ -553,7 +551,7 @@ msgstr "Abbonati"
 #: templates/newsletter/mailing_list_unsubscribe.html:4
 #: templates/newsletter/mailing_list_unsubscribe.html:7
 msgid "Unsubscription"
-msgstr "Annullamento iscrizione"
+msgstr "Annullamento sottoscrizione"
 
 #: templates/newsletter/mailing_list_unsubscribe.html:10
 msgid "You are unsubscribed for all mailing lists."
@@ -569,16 +567,7 @@ msgstr "Conferma questo indirizzo per rimuovere la sottoscrizione a questa lista
 
 #: templates/newsletter/mailing_list_unsubscribe.html:19
 msgid "Unsubscribe"
-msgstr "Rimuovi l'iscrizione"
-
-#: templates/newsletter/newsletter_forbidden.html:4
-#: templates/newsletter/newsletter_forbidden.html:9
-msgid "You are not allowd to view this newsletter"
-msgstr ""
-
-#: templates/newsletter/newsletter_forbidden.html:7
-msgid "Forbidden"
-msgstr ""
+msgstr "Rimuovi la sottoscrizione"
 
 #: templates/newsletter/newsletter_forbidden.html:4
 #: templates/newsletter/newsletter_forbidden.html:9
@@ -617,7 +606,7 @@ msgstr "clicca qui"
 
 #: templates/newsletter/newsletter_link_unsubscribe.html:8
 msgid "For unsubscribing to this mailing list,"
-msgstr "Per annullare l'iscrizione a questa lista,"
+msgstr "Per annullare l'iscrizione a questa mailing list,"
 
 #: templates/newsletter/newsletter_mail_verification.html:5
 msgid ""
@@ -666,7 +655,7 @@ msgstr "Stato di recapito sconosciuto"
 
 #: templates/newsletter/newsletter_statistics.html:150
 msgid "Unsubscriptions"
-msgstr "Annullamento iscrizioni"
+msgstr "Annullamento sottoscrizioni"
 
 #: templates/newsletter/newsletter_statistics.html:155
 msgid "Openings average"
@@ -762,7 +751,7 @@ msgstr ""
 
 #: templates/newsletter/cms/subscription_form.html:8
 msgid "You have successfully subscribed to the mailing list!"
-msgstr "Ti sei iscritto correttamente alla lista!"
+msgstr "Ti sei iscritto correttamente alla mailing list!"
 
 #: utils/importing.py:43
 #, python-format
@@ -772,12 +761,6 @@ msgstr ""
 #: utils/importing.py:44
 #, python-format
 msgid "Contacts imported by %s."
-msgstr "Contatti importati da %s."
-
-#: views/mailing_list.py:134
-msgid ""
-"Thanks for subscription, please click the following link to verify your "
-"email address."
 msgstr ""
 
 #: views/statistics.py:58

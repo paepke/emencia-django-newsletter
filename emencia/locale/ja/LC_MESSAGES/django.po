@@ -882,20 +882,6 @@ msgstr ""
 msgid "Historic of %s"
 msgstr ""
 
-#: views/verification.py:50
-msgid "Subriber verification"
-msgstr ""
-
-#: views/verification.py:51
-msgid ""
-"Thanks for subscription, please click the following link to verificate your "
-"email address."
-msgstr ""
-
-#: views/verification.py:57
-msgid "verify link"
-msgstr ""
-
 #~ msgid "key1: value1 key2: value2, splitted by return line."
 #~ msgstr "key1: value1 key2: value2, splitted by return line."
 

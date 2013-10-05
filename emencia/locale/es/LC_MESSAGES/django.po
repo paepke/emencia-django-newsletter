@@ -295,7 +295,7 @@ msgstr "%s creados con éxito."
 msgid "Create a mailinglist"
 msgstr "Crear una lista de correo"
 
-#: admin/contact.py:144
+#: admin/contact.py:126
 #, python-format
 msgid "%s contacts succesfully imported."
 msgstr "%s contactos importados satisfactoriamente."
@@ -339,11 +339,11 @@ msgstr "VCard"
 msgid "Export"
 msgstr "Exportar"
 
-#: admin/newsletter.py:40
+#: admin/newsletter.py:41
 msgid "Receivers"
 msgstr "Receptores"
 
-#: admin/newsletter.py:41
+#: admin/newsletter.py:42
 msgid "Sending"
 msgstr "Enviando"
 

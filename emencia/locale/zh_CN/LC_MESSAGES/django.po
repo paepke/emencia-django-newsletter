@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
+# 
 # Translators:
 # aaffdd11 <chenyuan328@gmail.com>, 2011
 msgid ""
@@ -294,7 +294,7 @@ msgstr "%s发送成功."
 msgid "Create a mailinglist"
 msgstr "创建一个邮件列表"
 
-#: admin/contact.py:144
+#: admin/contact.py:126
 #, python-format
 msgid "%s contacts succesfully imported."
 msgstr "%s联系人成功导入。"
@@ -338,11 +338,11 @@ msgstr "VCard"
 msgid "Export"
 msgstr "导出"
 
-#: admin/newsletter.py:40
+#: admin/newsletter.py:41
 msgid "Receivers"
 msgstr "接收人"
 
-#: admin/newsletter.py:41
+#: admin/newsletter.py:42
 msgid "Sending"
 msgstr "正在发送"
 

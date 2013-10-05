@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
+# 
 # Translators:
 # Oleg Prans <yozapr@gmail.com>, 2011
 msgid ""
@@ -294,7 +294,7 @@ msgstr "%s успешно создано."
 msgid "Create a mailinglist"
 msgstr "Создать список рассылки"
 
-#: admin/contact.py:144
+#: admin/contact.py:126
 #, python-format
 msgid "%s contacts succesfully imported."
 msgstr "%s контактов успешно импортировано."
@@ -338,11 +338,11 @@ msgstr "VCard"
 msgid "Export"
 msgstr "Экспорт"
 
-#: admin/newsletter.py:40
+#: admin/newsletter.py:41
 msgid "Receivers"
 msgstr "Получатели"
 
-#: admin/newsletter.py:41
+#: admin/newsletter.py:42
 msgid "Sending"
 msgstr "Отправка"
 

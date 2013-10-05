@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
+# 
 # Translators:
 # Gunleif Joensen <fo.umseting@gmail.com>, 2011
 msgid ""
@@ -294,7 +294,7 @@ msgstr ""
 msgid "Create a mailinglist"
 msgstr "Stovna ein postlista"
 
-#: admin/contact.py:144
+#: admin/contact.py:126
 #, python-format
 msgid "%s contacts succesfully imported."
 msgstr ""
@@ -338,11 +338,11 @@ msgstr "VCard"
 msgid "Export"
 msgstr "Flyt út"
 
-#: admin/newsletter.py:40
+#: admin/newsletter.py:41
 msgid "Receivers"
 msgstr "Móttakarir"
 
-#: admin/newsletter.py:41
+#: admin/newsletter.py:42
 msgid "Sending"
 msgstr "Sendi"
 
