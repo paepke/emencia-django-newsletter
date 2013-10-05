@@ -114,16 +114,21 @@ def get_newsletter_top_links(status):
 
 def get_newsletter_statistics(newsletter):
     """Return the statistics of a newsletter"""
-    recipients = newsletter.mailing_list.expedition_set().count()
+    # From NPH - fc285d2849cd07ae8e1ea28709e5aee2dd4eeb82
     all_status = Status.objects.filter(newsletter=newsletter)
+    recipients = all_status.filter(status=Status.SENT).count()
     post_sending_status = all_status.filter(creation_date__gte=newsletter.sending_date)
     mails_sent = post_sending_status.filter(status=Status.SENT).count()
+    if newsletter.status == newsletter.SENDING:
+        max_recipients = newsletter.mailing_list.expedition_set().count()
+    else:
+        max_recipients = recipients
 
     statistics = {
         'tests_sent': all_status.filter(status=Status.SENT_TEST).count(),
         'mails_sent': mails_sent,
         'mails_to_send': recipients,
-        'remaining_mails': recipients - mails_sent
+        'remaining_mails': max_recipients - mails_sent
     }
 
     statistics.update(get_newsletter_opening_statistics(post_sending_status, recipients))
