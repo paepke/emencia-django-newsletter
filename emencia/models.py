@@ -68,10 +68,8 @@ class Contact(models.Model):
 
     def mail_format(self):
         if self.full_name:
-            return '"%s" <%s>' % (
-                unicode(self.full_name).encode('utf-8'),
-                unicode(self.email).encode('utf-8')
-            )
+            return u'"{full_name}" <{email}>'.format(full_name=self.full_name,
+                                                     email=self.email)
         return self.email
     mail_format.short_description = _('mail format')
 
