@@ -32,12 +32,13 @@ class ContactAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
     list_display = (
         'full_name', 'email', 'verified', 'tester', 'subscriber', 'valid', 'total_subscriptions',
-        'creation_date'
+        'creation_date',
+        'source'
     )
-    list_filter = ('subscriber', 'valid', 'verified', 'tester', 'creation_date', 'modification_date')
-    search_fields = ('email', 'full_name')
+    list_filter = ('subscriber', 'valid', 'verified', 'tester', 'creation_date', 'modification_date', 'source')
+    search_fields = ('email', 'full_name', 'source')
     fieldsets = (
-        (None, {'fields': ('email', 'full_name')}),
+        (None, {'fields': ('email', 'full_name', 'source')}),
         (_('Status'), {'fields': ('verified', 'subscriber', 'valid', 'tester')}),
     )
     actions = ['create_mailinglist', 'export_vcard', 'export_excel']
