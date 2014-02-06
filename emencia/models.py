@@ -52,7 +52,7 @@ class Contact(models.Model):
 
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
-
+    source = models.TextField(_('source of dataset'), null=True, blank=True)
     objects = ContactManager()
 
     def subscriptions(self):
