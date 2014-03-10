@@ -32,10 +32,10 @@ class ContactAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
     list_display = (
         'full_name', 'email', 'verified', 'tester', 'subscriber', 'valid', 'total_subscriptions',
-        'creation_date',
+        'creation_date', 'gender',
         'source'
     )
-    list_filter = ('subscriber', 'valid', 'verified', 'tester', 'creation_date', 'modification_date', 'source')
+    list_filter = ('subscriber', 'valid', 'verified', 'tester', 'creation_date', 'modification_date', 'source', 'gender')
     search_fields = ('email', 'full_name', 'source')
     fieldsets = (
         (None, {'fields': ('email', 'full_name', 'source')}),

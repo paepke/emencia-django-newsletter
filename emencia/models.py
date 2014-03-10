@@ -36,7 +36,10 @@ from emencia.utils import html2text
 from emencia.utils.template import get_templates
 from emencia.utils.vcard import vcard_contact_export
 
-
+GENDER_CHOICES = (
+    ('M', _('Male')),
+    ('F', _('Female')),
+)
 logger = logging.getLogger(__name__)
 
 class Contact(models.Model):
@@ -46,6 +49,7 @@ class Contact(models.Model):
     verified = models.BooleanField('verified', default=False)
     full_name = models.CharField(_('full name'), max_length=255, null=True, blank=True)
 
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     subscriber = models.BooleanField(_('subscriber'), default=True)
     valid = models.BooleanField(_('valid email'), default=True)
     tester = models.BooleanField(_('contact tester'), default=False)
