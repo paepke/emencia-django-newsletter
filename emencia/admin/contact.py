@@ -38,7 +38,7 @@ class ContactAdmin(admin.ModelAdmin):
     list_filter = ('subscriber', 'valid', 'verified', 'tester', 'creation_date', 'modification_date', 'source', 'gender')
     search_fields = ('email', 'full_name', 'source')
     fieldsets = (
-        (None, {'fields': ('email', 'full_name', 'source')}),
+        (None, {'fields': ('email', 'full_name', 'source', 'gender')}),
         (_('Status'), {'fields': ('verified', 'subscriber', 'valid', 'tester')}),
     )
     actions = ['create_mailinglist', 'export_vcard', 'export_excel']
